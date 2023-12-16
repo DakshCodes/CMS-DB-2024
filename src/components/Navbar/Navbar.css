@@ -1,0 +1,134 @@
+.header {
+    display: flex;
+    align-items: center;
+    height: 68px;
+    border: 1px solid rgb(241, 235, 235);
+    background-color: var(--c-background-primary);
+    width: 100%;
+    justify-content: space-between;
+    padding: 0 1rem;
+    overflow: hidden;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+}
+
+.header-content .menu {
+    display: none;
+}
+
+.header-content .menu svg {
+    height: 25px;
+}
+
+@media (max-width: 1200px) {
+    .header-content {
+        justify-content: space-between;
+    }
+
+    .header-content .menu {
+        display: inline-flex;
+    }
+}
+
+
+
+.header-navigation {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 5rem;
+}
+
+@media (max-width: 1200px) {
+    .header-navigation {
+        display: none;
+    }
+}
+
+.header-navigation-links {
+    display: flex;
+    align-items: center;
+}
+
+.header-navigation-links a {
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.15s ease;
+    font-size: 0.890rem;
+    color: rgb(128, 128, 128);
+    font-family: garet;
+}
+
+.header-navigation-links .active{
+    color: rgb(0 0 0 / 1);
+}
+
+.header-navigation-links a+* {
+    margin-left: 1.5rem;
+}
+
+.header-navigation-links a:hover,
+.header-navigation-links a:focus {
+    color: rgb(0 0 0 / 1);
+}
+
+.header .avatar {
+    margin-left: 0.75rem;
+}
+
+
+.button {
+    font: inherit;
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1em;
+    height: 40px;
+    border-radius: 8px;
+    line-height: 1;
+    border: 2px solid var(--c-border-primary);
+    color: var(--c-text-action);
+    font-size: 0.875rem;
+    transition: 0.15s ease;
+    background-color: var(--c-background-primary);
+}
+
+
+.button:hover,
+.button:focus {
+    border-color: var(--c-accent-primary);
+    color: var(--c-accent-primary);
+}
+
+.icon-button {
+    font: inherit;
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    color: var(--c-text-action);
+    transition: 0.15s ease;
+}
+
+
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+}
