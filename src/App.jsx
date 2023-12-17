@@ -10,6 +10,8 @@ function App() {
 
   return (
     <>
+      {/* check */}
+      {/* final checking  */}
       <Navbar />
       <Routes>
         <Route
