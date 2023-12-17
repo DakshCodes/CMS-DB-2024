@@ -1,5 +1,4 @@
 import React from 'react';
-import './Layout.css';
 
 export default function DashboardLayout({ children }) {
   // You can add additional logic here if needed
