@@ -9,6 +9,7 @@ function App() {
 
   return (
     <>
+      {/* check */}
       <Navbar />
       <Routes>
         <Route
