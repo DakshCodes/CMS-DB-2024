@@ -1,21 +1,244 @@
 import React from 'react'
-import Input from '../ui/Input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/Table'
+import {
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
+    Input,
+    Button,
+    DropdownTrigger,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem,
+    Chip,
+    User,
+    Pagination,
+} from "@nextui-org/react";
+import { PlusIcon } from "../ui/PlusIcon";
+import { VerticalDotsIcon } from "../ui/VerticalDotsIcon";
+import { SearchIcon } from "../ui/SearchIcon";
+import { ChevronDownIcon } from "../ui/ChevronDownIcon";
+import { statusOptions } from "../../utils/data";
+import { capitalize } from "../../utils/utilss";
+
+
+
 
 const DataTable = () => {
-    return (
-        <div className='mx-10'>
-            <div className="flex items-center py-4">
-                <Input
-                    placeholder="Search"
-                    className="max-w-sm"
+
+    const columns = [
+        { name: "ID", uid: "id", sortable: true },
+        { name: "NAME", uid: "name", },
+        { name: "DATE", uid: "date" },
+        { name: "ACTIONS", uid: "actions" },
+    ];
+
+    const users = [
+        {
+            id: 1,
+            name: "Mens",
+            date: "2023-13-12",
+        },
+        {
+            id: 2,
+            name: "Womens",
+            date: "2021-10-12",
+        },
+    ];
+
+    const [filterValue, setFilterValue] = React.useState("");
+    const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
+    const [statusFilter, setStatusFilter] = React.useState("all");
+    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [sortDescriptor, setSortDescriptor] = React.useState({
+        column: "id",
+        direction: "ascending",
+    });
+    const [page, setPage] = React.useState(1);
+
+    const pages = Math.ceil(users.length / rowsPerPage);
+
+    const hasSearchFilter = Boolean(filterValue);
+
+    const filteredItems = React.useMemo(() => {
+        let filteredUsers = [...users];
+        if (hasSearchFilter) {
+            filteredUsers = filteredUsers.filter((user) => {
+                return user.name.toLowerCase().includes(filterValue.toLowerCase())
+            });
+        }
+        // if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
+        //     filteredUsers = filteredUsers.filter((user) =>
+        //         Array.from(statusFilter).includes(user.status),
+        //     );
+        // }
+
+        return filteredUsers;
+    }, [users, filterValue, statusFilter]);
+
+    const items = React.useMemo(() => {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        return filteredItems.slice(start, end);
+    }, [page, filteredItems, rowsPerPage]);
+
+
+
+    const sortedItems = React.useMemo(() => {
+        return [...items].sort((a, b) => {
+            const first = a[sortDescriptor.column];
+            const second = b[sortDescriptor.column];
+            const cmp = first < second ? -1 : first > second ? 1 : 0;
+
+            return sortDescriptor.direction === "descending" ? -cmp : cmp;
+        });
+    }, [sortDescriptor, items]);
+
+    const renderCell = React.useCallback((user, columnKey) => {
+        const cellValue = user[columnKey];
+
+        switch (columnKey) {
+            case "name":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user.name}
+                    </p>
+                );
+            case "date":
+                return (
+                    <div className="font-2 font-medium text-[#000]">
+                        {user.date}
+                    </div>
+                );
+            case "actions":
+                return (
+                    <div className="relative  w-[max-content] flex justify-start items-center gap-2">
+                        <Dropdown className="bg-background border-1 border-default-200">
+                            <DropdownTrigger>
+                                <Button isIconOnly radius="full" size="sm" variant="light">
+                                    <VerticalDotsIcon className="text-[#000]" />
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu className='font-2 font-medium text-[#000]'>
+                                <DropdownItem onClick={() => alert(user.id)}>View</DropdownItem>
+                                <DropdownItem onClick={() => alert(user.id)}>Edit</DropdownItem>
+                                <DropdownItem onClick={() => alert(user.id)}>Delete</DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                );
+            default:
+                return cellValue;
+        }
+    }, []);
+
+    const onRowsPerPageChange = React.useCallback((e) => {
+        setRowsPerPage(Number(e.target.value));
+        setPage(1);
+    }, []);
+
+
+    const onSearchChange = React.useCallback((value) => {
+        console.log(value, "value")
+        if (value) {
+            setFilterValue(value);
+            setPage(1);
+        } else {
+            setFilterValue("");
+        }
+    }, []);
+
+    const topContent = React.useMemo(() => {
+        return (
+            <div className=" flex flex-col gap-4 my-5 ">
+                <div className="flex justify-between gap-3 items-end">
+                    <Input
+                        isClearable
+                        classNames={{
+                            base: "w-full sm:max-w-[44%] ",
+                            inputWrapper: "font-2 font-bold ",
+                        }}
+                        placeholder="Search by name..."
+                        size="sm"
+                        startContent={<SearchIcon className="text-default-300" />}
+                        value={filterValue}
+                        variant="underlined"
+                        onClear={() => setFilterValue("")}
+                        onValueChange={onSearchChange}
+                    />
+                </div>
+            </div>
+        );
+    }, [
+        filterValue,
+        statusFilter,
+        onSearchChange,
+        onRowsPerPageChange,
+        users.length,
+        hasSearchFilter,
+    ]);
+
+    const bottomContent = React.useMemo(() => {
+        return (
+            <div className="py-10  flex justify-between items-center ">
+                <Pagination
+                    showControls
+                    classNames={{
+                        cursor: "bg-foreground text-background",
+                    }}
+                    color="default"
+                    isDisabled={hasSearchFilter}
+                    page={page}
+                    total={pages}
+                    variant="light"
+                    onChange={setPage}
                 />
             </div>
-            <div className="rounded-md border">
-                
-            </div>
-        </div >
-    )
+        );
+    }, items.length, page, pages, hasSearchFilter);
+
+    return (
+        <Table
+            isCompact
+            removeWrapper
+            aria-label="Example table with custom cells, pagination and sorting"
+            bottomContent={bottomContent}
+            bottomContentPlacement="outside"
+            className='table !mx-4 md:!mx-10'
+            selectedKeys={selectedKeys}
+            sortDescriptor={sortDescriptor}
+            topContent={topContent}
+            topContentPlacement="outside"
+            onSelectionChange={setSelectedKeys}
+            onSortChange={setSortDescriptor}
+        >
+            <TableHeader columns={columns} >
+                {(column) => (
+                    <TableColumn
+                        key={column.uid}
+                        align={column.uid === "actions" ? "center" : "start"}
+                        allowsSorting={column.sortable}
+                        className="font font-medium text-[#000] "
+                    >
+                        {column.name}
+                    </TableColumn>
+                )}
+            </TableHeader>
+            <TableBody emptyContent={"No users found"} items={sortedItems}>
+                {(item) => (
+                    <TableRow key={item.id} >
+                        {(columnKey) => <TableCell >{renderCell(item, columnKey)}</TableCell>}
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
 }
 
-export default DataTable
+
+export default DataTable;
