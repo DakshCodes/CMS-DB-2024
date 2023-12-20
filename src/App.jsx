@@ -1,7 +1,6 @@
 // App.js
 import React from 'react';
 import './App.css';
-import Navbar from './components/Navbar/Navbar';
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './pages/Dashboard/Layout';
 import OverView from './pages/Overview/OverView';
@@ -17,6 +16,7 @@ import Products from './pages/Products/Products';
 import ProductsForm from './pages/Products/ProductsForm';
 import Orders from './pages/Orders/Orders';
 import Setting from './pages/Settinngs/Setting';
+import Header from './components/Navbar/Header';
 
 const routesConfig = [
   { path: '/', element: <OverView /> },
@@ -88,7 +88,7 @@ function generateRoutes(config) {
 function App() {
   return (
     <>
-      <Navbar />
+      <Header />
       <Routes>
         {generateRoutes(routesConfig)}
       </Routes>

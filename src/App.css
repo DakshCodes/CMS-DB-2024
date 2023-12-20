@@ -23,3 +23,8 @@
 .table-head{
   background-color: #000 !important;
 }
+
+
+.header-p header{
+    padding: 0;
+}

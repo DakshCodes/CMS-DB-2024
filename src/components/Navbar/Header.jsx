@@ -1,11 +1,14 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom';
 import DropDown from '../ui/DropDown/DropDown';
-import './Navbar.css'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
+import './Header.css'
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Avatar } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarMenuToggle, NavbarMenuItem, NavbarMenu, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { Card, CardBody } from "@nextui-org/react";
 
-const Navbar = () => {
+const Header = () => {
+    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const location = useLocation();
@@ -17,7 +20,7 @@ const Navbar = () => {
         {
             href: `/`,
             label: 'Overview',
-            active: pathname === `/`,
+            active: pathname === '/',
         },
         {
             href: `/billboards`,
@@ -57,7 +60,7 @@ const Navbar = () => {
     ]
     return (
         <>
-            <header className="header">
+            <header className="header ">
                 <div className="header-content">
                     <Link to={'/'} className="hidden md:block">
                         <DropDown />
@@ -81,14 +84,37 @@ const Navbar = () => {
                         <div className="absolute w-[30px] h-full text-lg flex items-center justify-center right-0">›</div>
                     </button>
 
-                    <a href="#" className="button menu !block md:!hidden">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth={0} /><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" /><g id="SVGRepo_iconCarrier"> <g id="style=fill"> <g id="menu-fries"> <path id="Subtract" fillRule="evenodd" clipRule="evenodd" d="M7.25 1.25C3.93629 1.25 1.25 3.93629 1.25 7.25V16.75C1.25 20.0637 3.93629 22.75 7.25 22.75H16.75C20.0637 22.75 22.75 20.0637 22.75 16.75V7.25C22.75 3.93629 20.0637 1.25 16.75 1.25H7.25ZM4.84615 7C4.51691 7 4.25 7.33579 4.25 7.75C4.25 8.16421 4.51691 8.5 4.84615 8.5H19.1538C19.4831 8.5 19.75 8.16421 19.75 7.75C19.75 7.33579 19.4831 7 19.1538 7H4.84615ZM4.25 16.75C4.25 16.3358 4.51691 16 4.84615 16H19.1538C19.4831 16 19.75 16.3358 19.75 16.75C19.75 17.1642 19.4831 17.5 19.1538 17.5H4.84615C4.51691 17.5 4.25 17.1642 4.25 16.75ZM10 11.5C9.58579 11.5 9.25 11.8358 9.25 12.25C9.25 12.6642 9.58579 13 10 13L19 13C19.4142 13 19.75 12.6642 19.75 12.25C19.75 11.8358 19.4142 11.5 19 11.5L10 11.5Z" fill="#000000" /> </g> </g> </g></svg>
-                    </a>
+                    <Navbar
+                        isMenuOpen={isMenuOpen}
+                        onMenuOpenChange={setIsMenuOpen}
+                        className="header-p sm:hidden w-[max-content] bg-[#fff]"
+                    >
+                        <NavbarContent className="sm:hidden" justify="start" >
+                            <svg onClick={() => setIsMenuOpen(prv => !prv)} className="w-[40px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="style=fill"> <g id="menu-strawberry"> <path id="Subtract" fillRule="evenodd" clipRule="evenodd" d={`${!isMenuOpen ? ('M7.25 1.25C3.93629 1.25 1.25 3.93629 1.25 7.25V16.75C1.25 20.0637 3.93629 22.75 7.25 22.75H16.75C20.0637 22.75 22.75 20.0637 22.75 16.75V7.25C22.75 3.93629 20.0637 1.25 16.75 1.25H7.25ZM4.84615 7C4.51691 7 4.25 7.33579 4.25 7.75C4.25 8.16421 4.51691 8.5 4.84615 8.5H19.1538C19.4831 8.5 19.75 8.16421 19.75 7.75C19.75 7.33579 19.4831 7 19.1538 7H4.84615ZM6.25 12.25C6.25 11.8358 6.58579 11.5 7 11.5H17C17.4142 11.5 17.75 11.8358 17.75 12.25C17.75 12.6642 17.4142 13 17 13H7C6.58579 13 6.25 12.6642 6.25 12.25ZM9 16C8.58579 16 8.25 16.3358 8.25 16.75C8.25 17.1642 8.58579 17.5 9 17.5H15C15.4142 17.5 15.75 17.1642 15.75 16.75C15.75 16.3358 15.4142 16 15 16H9Z') : ('M1.25 7.25C1.25 3.93629 3.93629 1.25 7.25 1.25L16.75 1.25C20.0637 1.25 22.75 3.93629 22.75 7.25L22.75 16.75C22.75 20.0637 20.0637 22.75 16.75 22.75L7.25 22.75C3.93629 22.75 1.25 20.0637 1.25 16.75L1.25 7.25ZM7.18298 7.18298C7.42696 6.939 7.82253 6.939 8.06651 7.18298L12 11.1165L15.9335 7.18298C16.1775 6.939 16.573 6.93901 16.817 7.18299C17.061 7.42697 17.061 7.82254 16.817 8.06652L12.8835 12L16.817 15.9335C17.061 16.1775 17.061 16.573 16.817 16.817C16.573 17.061 16.1775 17.061 15.9335 16.817L12 12.8835L8.0665 16.817C7.82252 17.061 7.42695 17.061 7.18298 16.817C6.939 16.573 6.93901 16.1775 7.18299 15.9335L11.1165 12L7.18298 8.06651C6.93901 7.82253 6.93901 7.42696 7.18298 7.18298Z')}`} fill="#000000"></path> </g> </g> </g></svg>
+                        </NavbarContent>
+                        <NavbarMenu className='font-2 font-normal' >
+                            <Link to={'/'} onClick={() => setIsMenuOpen(prv => !prv)}>
+                                <Avatar size='lg' src="https://i.pinimg.com/564x/88/b6/a6/88b6a65764a0f68a478386e0cea26344.jpg" />
+                            </Link>
+                            {routes.map((item, index) => (
+                                <NavbarMenuItem key={`${item}-${index}`} className='mt-2'>
+                                    <Link
+                                        className={item.active ? 'active' : 'w-full text-[1.2rem] !text-[#8b8b8b]'}
+                                        to={item.href}
+                                        onClick={() => setIsMenuOpen(prv => !prv)}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                </NavbarMenuItem>
+                            ))}
+                        </NavbarMenu>
+                    </Navbar>
                     <Link to={'/settings'} className="avatar !hidden md:!flex">
                         <img src="https://i.pinimg.com/564x/88/b6/a6/88b6a65764a0f68a478386e0cea26344.jpg" alt="Profile" />
                     </Link>
                 </div>
             </header>
+
             {/* Notification Model */}
             <Modal backdrop={"blur"} isOpen={isOpen} onClose={onClose} size={'3xl'}>
                 <ModalContent >
@@ -125,4 +151,4 @@ const Navbar = () => {
     )
 }
 
-export default Navbar
+export default Header
