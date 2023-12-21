@@ -17,8 +17,10 @@ import ProductsForm from './pages/Products/ProductsForm';
 import Orders from './pages/Orders/Orders';
 import Setting from './pages/Settinngs/Setting';
 import Header from './components/Navbar/Header';
+import LoginPage from './pages/LoginPage/loginPage';
 
 const routesConfig = [
+  { path: '/login', element: <LoginPage /> },
   { path: '/', element: <OverView /> },
   {
     path: '/billboards',
