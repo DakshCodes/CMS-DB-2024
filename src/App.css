@@ -28,3 +28,7 @@
 .header-p header{
     padding: 0;
 }
+
+::-webkit-scrollbar{
+    display: none;
+}
