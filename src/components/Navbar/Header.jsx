@@ -27,21 +27,11 @@ const Header = () => {
             label: 'Billboards',
             active: pathname.includes('billboards'),
         },
-        {
-            href: `/categories`,
-            label: 'Categories',
-            active: pathname.includes('categories'),
-        },
-        {
-            href: `/sizes`,
-            label: 'Sizes',
-            active: pathname.includes('sizes'),
-        },
-        {
-            href: `/colors`,
-            label: 'Colors',
-            active: pathname.includes('colors'),
-        },
+        // {
+        //     href: `/categories`,
+        //     label: 'Categories',
+        //     active: pathname.includes('categories'),
+        // },
         {
             href: `/products`,
             label: 'Products',
