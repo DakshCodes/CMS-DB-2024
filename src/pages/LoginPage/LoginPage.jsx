@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom"
 import { useEffect } from 'react'
 import { loginValidate } from '../../utils/validate'
 import { loginUser } from '../../apicalls/login'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Checkbox, Input, Link } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Checkbox, Input, Link } from "@nextui-org/react";
+
 const LoginPage = () => {
   const navigate = useNavigate();
 
@@ -14,11 +15,18 @@ const LoginPage = () => {
 
       const response = await loginUser(values);
 
-      if (response) {
-        localStorage.setItem("token", response);
-        console.log(response)
+      const data = response.data;
+
+      console.log(data, "data")
+
+      if (data.ok) {
+        localStorage.setItem("token", data.token);
         navigate("/")
       }
+      else {
+        console.log(data.error)
+      }
+
     } catch (error) {
       console.log(error)
     }

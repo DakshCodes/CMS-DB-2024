@@ -3,7 +3,7 @@ import axios from "axios"
 export const loginUser = async(payload)=>{
     try {
         const response = await axios.post("http://localhost:5000/api/login",payload);
-        return response.data;
+        return response;
     //    response.data = toast.success('email sent sucessfully');
     } catch (error) {
         return error.message 
