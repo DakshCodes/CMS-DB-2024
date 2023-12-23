@@ -19,7 +19,7 @@ const LoginPage = () => {
 
       console.log(data, "data")
 
-      if (data.ok) {
+      if (data.success) {
         localStorage.setItem("token", data.token);
         navigate("/")
       }
