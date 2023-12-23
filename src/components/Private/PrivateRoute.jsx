@@ -2,11 +2,10 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { SetUser } from "../../redux/usersSlice";
-import { GetCurrentUser} from '../../apicalls/user';
+import { GetCurrentUser } from '../../apicalls/user';
 import toast from 'react-hot-toast';
 
 const PrivateRoute = ({ children }) => {
-
     const { user } = useSelector((state) => state.users);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -30,14 +29,14 @@ const PrivateRoute = ({ children }) => {
                 } else {
                     // Handle other errors
                     navigate("/login");
-                    message.error(response.message);
+                    console.log(response.message)
                 }
             }
 
         } catch (error) {
             // dispatch(SetLoader(false));
             navigate("/login")
-            message.error(error.message);
+            console.log(response.message)
         }
     }
 

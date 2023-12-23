@@ -20,6 +20,8 @@ import Header from './components/Navbar/Header';
 import LoginPage from './pages/LoginPage/LoginPage';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/Private/PrivateRoute';
+import { Spinner } from "@nextui-org/react";
+import { useSelector } from 'react-redux';
 
 const routesConfig = [
   // { path: '/login', element: <LoginPage /> },
@@ -92,17 +94,26 @@ function generateRoutes(config) {
 }
 
 function App() {
+
+  const { loading } = useSelector((state) => state.loaders);
+
   return (
     <>
+      {/* {
+        loading && <div className="absolute backdrop-blur-sm z-[9999999] left-0 top-0  h-screen w-screen flex justify-center items-center">
+          <Spinner size='md' color="current" />
+        </div>
+      } */}
       <div><Toaster /></div>
       <Header />
       <Routes>
         {generateRoutes(routesConfig)}
         <Route
           path='/login'
-          element = {<LoginPage />}
+          element={<LoginPage />}
         />
       </Routes>
+
     </>
   );
 }
