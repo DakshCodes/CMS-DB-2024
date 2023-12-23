@@ -5,30 +5,37 @@
 
 
 
+
 @font-face {
     font-family: garet;
     src: url('/src/assets/Garet-Book.ttf');
 }
 
-.font{
+.font {
     font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
-.font-2{
-    font-family: 'jost',sans-serif;
+
+.font-2 {
+    font-family: 'jost', sans-serif;
+}
+
+.monu {
+    font-family: monu, sans-serif;
 }
 
 .table {
     width: 95%;
 }
-.table-head{
-  background-color: #000 !important;
+
+.table-head {
+    background-color: #000 !important;
 }
 
 
-.header-p header{
+.header-p header {
     padding: 0;
 }
 
-::-webkit-scrollbar{
+::-webkit-scrollbar {
     display: none;
 }
