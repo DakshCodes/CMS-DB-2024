@@ -95,15 +95,10 @@ function generateRoutes(config) {
 
 function App() {
 
-  const { loading } = useSelector((state) => state.loaders);
+  // const { loading } = useSelector((state) => state.loaders); for loading state chnage
 
   return (
     <>
-      {/* {
-        loading && <div className="absolute backdrop-blur-sm z-[9999999] left-0 top-0  h-screen w-screen flex justify-center items-center">
-          <Spinner size='md' color="current" />
-        </div>
-      } */}
       <div><Toaster /></div>
       <Header />
       <Routes>

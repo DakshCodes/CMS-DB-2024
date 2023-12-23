@@ -2,8 +2,10 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { SetUser } from "../../redux/usersSlice";
+import { SetLoader } from "../../redux/loadersSlice";
 import { GetCurrentUser } from '../../apicalls/user';
 import toast from 'react-hot-toast';
+import { Spinner } from '@nextui-org/react';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useSelector((state) => state.users);
@@ -13,9 +15,9 @@ const PrivateRoute = ({ children }) => {
     const validateToken = async () => {
 
         try {
-            // dispatch(SetLoader(true));
+            dispatch(SetLoader(true));
             const response = await GetCurrentUser();
-            // dispatch(SetLoader(false));
+            dispatch(SetLoader(false));
             // updateToken();
 
 
@@ -34,7 +36,7 @@ const PrivateRoute = ({ children }) => {
             }
 
         } catch (error) {
-            // dispatch(SetLoader(false));
+            dispatch(SetLoader(false));
             navigate("/login")
             console.log(response.message)
         }
@@ -52,12 +54,17 @@ const PrivateRoute = ({ children }) => {
 
     return (
         <>
-            {user && (
+            {user ? (
 
                 <div>
                     {children}
                 </div>
-            )}
+            ) : (
+                <div className="absolute backdrop-blur-sm z-[9999999] left-0 top-0  h-screen w-screen flex justify-center items-center">
+                    <Spinner size='md' color="current" />
+                </div>
+            )
+            }
         </>
     )
 }
