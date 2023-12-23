@@ -3,9 +3,10 @@ import { useFormik } from 'formik'
 import '../LoginPage/LoginPage.css'
 import { useNavigate } from "react-router-dom"
 import { useEffect } from 'react'
-import { loginValidate } from '../../utils/validate'
-import { loginUser } from '../../apicalls/login'
+// import { loginValidate } from '../../utils/validate'
+import { loginUser } from '../../apicalls/user'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Checkbox, Input, Link } from "@nextui-org/react";
+import toast from 'react-hot-toast'
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -15,20 +16,18 @@ const LoginPage = () => {
 
       const response = await loginUser(values);
 
-      const data = response.data;
 
-      console.log(data, "data")
-
-      if (data.ok) {
-        localStorage.setItem("token", data.token);
+      if (response.success) {
+        localStorage.setItem("token", response.token);
+        toast.success('Logged In successfully')
         navigate("/")
       }
       else {
-        console.log(data.error)
+        throw new Error(response.message);
       }
 
     } catch (error) {
-      console.log(error)
+      toast.error(error.message)
     }
   }
 
@@ -48,9 +47,7 @@ const LoginPage = () => {
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async values => {
-      logInOnFinish(values)
-      // values.email = '';
-      // values.password = '';
+      await logInOnFinish(values)
     },
 
   })

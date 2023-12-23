@@ -17,10 +17,12 @@ import ProductsForm from './pages/Products/ProductsForm';
 import Orders from './pages/Orders/Orders';
 import Setting from './pages/Settinngs/Setting';
 import Header from './components/Navbar/Header';
-import LoginPage from './pages/LoginPage/loginPage';
+import LoginPage from './pages/LoginPage/LoginPage';
+import { Toaster } from 'react-hot-toast';
+import PrivateRoute from './components/Private/PrivateRoute';
 
 const routesConfig = [
-  { path: '/login', element: <LoginPage /> },
+  // { path: '/login', element: <LoginPage /> },
   { path: '/', element: <OverView /> },
   {
     path: '/billboards',
@@ -79,9 +81,11 @@ function generateRoutes(config) {
       key={index}
       path={route.path}
       element={
-        <DashboardLayout>
-          {route.element}
-        </DashboardLayout>
+        <PrivateRoute>
+          <DashboardLayout>
+            {route.element}
+          </DashboardLayout>
+        </PrivateRoute>
       }
     />
   ));
@@ -90,9 +94,14 @@ function generateRoutes(config) {
 function App() {
   return (
     <>
+      <div><Toaster /></div>
       <Header />
       <Routes>
         {generateRoutes(routesConfig)}
+        <Route
+          path='/login'
+          element = {<LoginPage />}
+        />
       </Routes>
     </>
   );

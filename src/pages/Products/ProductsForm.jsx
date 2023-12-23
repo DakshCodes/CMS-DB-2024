@@ -2,8 +2,12 @@ import React from 'react'
 import Heading from '../../components/ui/Heading'
 import { Input, Button, Tabs, Tab, Card } from "@nextui-org/react";
 import Selected from '../../components/ui/Select';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const ProductsForm = () => {
+
+    const [value, setValue] = React.useState('');
 
     let tabs = [
         {
@@ -36,9 +40,22 @@ const ProductsForm = () => {
                             label="Name"
                             variant='underlined'
                             labelPlacement={'outside'}
-                            className="font font-bold w-[10rem]"
+                            className="font font-bold w-full"
                             placeholder="Product Name"
                         />
+
+                        <div className='mt-4'>
+
+                            <ReactQuill
+                                theme="snow"
+                                value={value}
+                                onChange={setValue}
+                            />
+
+                        </div>
+
+                        {value}
+
                         <Tabs aria-label="Options" color={'primary'} className="font-sans font-bold mt-10" variant="bordered">
                             <Tab key="photos" title="Genral" >
                                 <Card className='px-5 py-4  gap-5 flex-row items-center'>
@@ -76,10 +93,20 @@ const ProductsForm = () => {
                             </Tab>
                             <Tab key="music" title="Attributes">
                                 <Card>
-
+                                    hey
                                 </Card>
                             </Tab>
                         </Tabs>
+
+                        <div className='mt-4'>
+
+                            <ReactQuill
+                                theme="snow"
+                                value={value}
+                                onChange={setValue}
+                            />
+                            
+                        </div>
                     </div>
                     <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
                         Create
