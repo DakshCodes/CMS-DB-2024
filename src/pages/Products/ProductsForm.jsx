@@ -7,10 +7,13 @@ import 'react-quill/dist/quill.snow.css';
 import { UploadImage } from '../../apicalls/user';
 import { CreateProduct } from '../../apicalls/product';
 import toast from 'react-hot-toast';
+import { SetLoader } from "../../redux/loadersSlice";
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 const ProductsForm = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formValues, setFormValues] = React.useState({
         productName: '',
         regularPrice: '',
@@ -37,10 +40,11 @@ const ProductsForm = () => {
         console.log('Form Values:', formValues);
 
         try {
-
+            dispatch(SetLoader(true));
             const response = await CreateProduct(formValues);
+            dispatch(SetLoader(false));
             console.log(response);
-
+            
             if (response.success) {
                 toast.success(response.message)
                 navigate("/products")
@@ -48,8 +52,9 @@ const ProductsForm = () => {
             else {
                 throw new Error(response.message);
             }
-
+            
         } catch (error) {
+            dispatch(SetLoader(false));
             console.log(error.message)
             toast.error(error.message)
         }
