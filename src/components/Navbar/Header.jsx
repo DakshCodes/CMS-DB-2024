@@ -5,8 +5,12 @@ import './Header.css'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Avatar } from "@nextui-org/react";
 import { Navbar, NavbarBrand, NavbarMenuToggle, NavbarMenuItem, NavbarMenu, NavbarContent, NavbarItem } from "@nextui-org/react";
 import { Card, CardBody } from "@nextui-org/react";
+import { useSelector } from 'react-redux';
 
 const Header = () => {
+    const { user } = useSelector((state) => state.users);
+
+
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -53,7 +57,7 @@ const Header = () => {
             <header className="header ">
                 <div className="header-content">
                     <Link to={'/'} className="hidden md:block">
-                        <DropDown />
+                        <DropDown name={user?.username} />
                     </Link>
                     <div className="header-navigation">
                         <nav className="header-navigation-links">
@@ -84,7 +88,7 @@ const Header = () => {
                         </NavbarContent>
                         <NavbarMenu className='font-2 font-normal' >
                             <Link to={'/'} onClick={() => setIsMenuOpen(prv => !prv)}>
-                                <Avatar size='lg' src="https://i.pinimg.com/564x/88/b6/a6/88b6a65764a0f68a478386e0cea26344.jpg" />
+                                <Avatar size='lg' src={user?.avatar} />
                             </Link>
                             {routes.map((item, index) => (
                                 <NavbarMenuItem key={`${item}-${index}`} className='mt-2'>
@@ -100,7 +104,7 @@ const Header = () => {
                         </NavbarMenu>
                     </Navbar>
                     <Link to={'/settings'} className="avatar !hidden md:!flex">
-                        <img src="https://i.pinimg.com/564x/88/b6/a6/88b6a65764a0f68a478386e0cea26344.jpg" alt="Profile" />
+                        <img src={user?.avatar}  alt="Profile" />
                     </Link>
                 </div>
             </header>
