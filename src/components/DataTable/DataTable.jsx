@@ -26,21 +26,8 @@ import { capitalize } from "../../utils/utilss";
 
 
 
-const DataTable = ({data,columnss}) => {
+const DataTable = ({ data, columnss }) => {
 
-
-    const users = [
-        {
-            id: 1,
-            name: "Mens",
-            date: "2023-13-12",
-        },
-        {
-            id: 2,
-            name: "Womens",
-            date: "2021-10-12",
-        },
-    ];
 
     const [filterValue, setFilterValue] = React.useState("");
     const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
@@ -64,7 +51,7 @@ const DataTable = ({data,columnss}) => {
             });
         }
         return filteredUsers;
-    }, [users, filterValue, statusFilter]);
+    }, [data, filterValue, statusFilter]);
 
     const items = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -85,7 +72,7 @@ const DataTable = ({data,columnss}) => {
         });
     }, [sortDescriptor, items]);
 
-    const renderCell = React.useCallback((user, columnKey) => {
+    const renderCell = React.useCallback((user, columnKey, index) => {
         const cellValue = user[columnKey];
 
         switch (columnKey) {
@@ -233,9 +220,9 @@ const DataTable = ({data,columnss}) => {
                 )}
             </TableHeader>
             <TableBody emptyContent={"No users found"} items={sortedItems}>
-                {(item) => (
+                {(item,index) => (
                     <TableRow key={item._id} >
-                        {(columnKey) => <TableCell >{renderCell(item, columnKey)}</TableCell>}
+                        {(columnKey) => <TableCell >{renderCell(item, columnKey, index)}</TableCell>}
                     </TableRow>
                 )}
             </TableBody>

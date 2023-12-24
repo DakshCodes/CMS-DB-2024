@@ -5,21 +5,25 @@ import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import toast from 'react-hot-toast'
 import { GetProductsData } from '../../apicalls/product'
+import { useDispatch } from 'react-redux'
+import { SetLoader } from "../../redux/loadersSlice";
 
 const Products = () => {
     const [productsData , setProductsData] = React.useState([])
+    const dispatch = useDispatch();
 
     const getProductsData  = async() =>{
         try {
+            dispatch(SetLoader(true));
             const response = await GetProductsData();
-
+            dispatch(SetLoader(false));
             if(response.success){
                 setProductsData(response.products);
-                toast.success(response.message);
             } else{
                 throw new Error(response.message);
             }
         } catch (error) {
+            dispatch(SetLoader(false));
             toast.error(error.message)
         }
     }
@@ -30,7 +34,6 @@ const Products = () => {
 
     
     const columns = [
-        { name: "ID", uid: "_id", sortable: true },
         { name: "Product Name", uid: "productName" },
         { name: "Regular Price", uid: "regularPrice" },
         { name: "Sale Price", uid: "salePrice" },
