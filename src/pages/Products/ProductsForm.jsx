@@ -15,7 +15,6 @@ const ProductsForm = () => {
         productName: '',
         regularPrice: '',
         salePrice: '',
-        // ... add more fields as needed
         mainDescription: '',
         shortDescription: '',
         product_images: [],
@@ -77,10 +76,6 @@ const ProductsForm = () => {
                 alert(response.message);
                 const newImageLink = response.url;
                 setImageLinks((prevLinks) => [...prevLinks, newImageLink]);
-                // setFormValues((prevValues) => ({
-                //     ...prevValues,
-                //     product_images: [...prevValues.product_images, newImageLink],
-                // }));
 
             } else {
                 console.log(response.message);
