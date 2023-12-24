@@ -26,14 +26,8 @@ import { capitalize } from "../../utils/utilss";
 
 
 
-const DataTable = () => {
+const DataTable = ({data,columnss}) => {
 
-    const columns = [
-        { name: "ID", uid: "id", sortable: true },
-        { name: "NAME", uid: "name", },
-        { name: "DATE", uid: "date" },
-        { name: "ACTIONS", uid: "actions" },
-    ];
 
     const users = [
         {
@@ -58,23 +52,17 @@ const DataTable = () => {
     });
     const [page, setPage] = React.useState(1);
 
-    const pages = Math.ceil(users.length / rowsPerPage);
+    const pages = Math.ceil(data.length / rowsPerPage);
 
     const hasSearchFilter = Boolean(filterValue);
 
     const filteredItems = React.useMemo(() => {
-        let filteredUsers = [...users];
+        let filteredUsers = [...data];
         if (hasSearchFilter) {
             filteredUsers = filteredUsers.filter((user) => {
-                return user.name.toLowerCase().includes(filterValue.toLowerCase())
+                return user?.productName.toLowerCase().includes(filterValue.toLowerCase())
             });
         }
-        // if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-        //     filteredUsers = filteredUsers.filter((user) =>
-        //         Array.from(statusFilter).includes(user.status),
-        //     );
-        // }
-
         return filteredUsers;
     }, [users, filterValue, statusFilter]);
 
@@ -101,18 +89,34 @@ const DataTable = () => {
         const cellValue = user[columnKey];
 
         switch (columnKey) {
-            case "name":
+            case "productName":
                 return (
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user.name}
+                        {user.productName}
                     </p>
                 );
-            case "date":
+            case "regularPrice":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user.productName}
+                    </p>
+                );
+            case "salePrice":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user.productName}
+                    </p>
+                );
+            case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {user.date}
+                        {user.productName}
                     </div>
                 );
             case "actions":
@@ -125,9 +129,9 @@ const DataTable = () => {
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu className='font-2 font-medium text-[#000]'>
-                                <DropdownItem onClick={() => alert(user.id)}>View</DropdownItem>
-                                <DropdownItem onClick={() => alert(user.id)}>Edit</DropdownItem>
-                                <DropdownItem onClick={() => alert(user.id)}>Delete</DropdownItem>
+                                <DropdownItem onClick={() => alert(user._id)}>View</DropdownItem>
+                                <DropdownItem onClick={() => alert(user._id)}>Edit</DropdownItem>
+                                <DropdownItem onClick={() => alert(user._id)}>Delete</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -144,7 +148,6 @@ const DataTable = () => {
 
 
     const onSearchChange = React.useCallback((value) => {
-        console.log(value, "value")
         if (value) {
             setFilterValue(value);
             setPage(1);
@@ -179,7 +182,7 @@ const DataTable = () => {
         statusFilter,
         onSearchChange,
         onRowsPerPageChange,
-        users.length,
+        data.length,
         hasSearchFilter,
     ]);
 
@@ -195,12 +198,12 @@ const DataTable = () => {
                     isDisabled={hasSearchFilter}
                     page={page}
                     total={pages}
-                    variant="light"
+                    variant="bordered"
                     onChange={setPage}
                 />
             </div>
         );
-    }, items.length, page, pages, hasSearchFilter);
+    }, [items.length, page, pages, hasSearchFilter]);
 
     return (
         <Table
@@ -217,7 +220,7 @@ const DataTable = () => {
             onSelectionChange={setSelectedKeys}
             onSortChange={setSortDescriptor}
         >
-            <TableHeader columns={columns} >
+            <TableHeader columns={columnss} >
                 {(column) => (
                     <TableColumn
                         key={column.uid}
@@ -231,7 +234,7 @@ const DataTable = () => {
             </TableHeader>
             <TableBody emptyContent={"No users found"} items={sortedItems}>
                 {(item) => (
-                    <TableRow key={item.id} >
+                    <TableRow key={item._id} >
                         {(columnKey) => <TableCell >{renderCell(item, columnKey)}</TableCell>}
                     </TableRow>
                 )}

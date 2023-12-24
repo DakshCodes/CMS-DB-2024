@@ -28,6 +28,7 @@ const Products = () => {
         getProductsData();
     },[]);
 
+    
     const columns = [
         { name: "ID", uid: "_id", sortable: true },
         { name: "Product Name", uid: "productName" },
@@ -36,7 +37,8 @@ const Products = () => {
         { name: "Created At", uid: "createdAt" },
         { name: "Actions", uid: "actions" },
     ];
-
+    
+   
     return (
         <>
             <div className="flex items-center justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
@@ -47,7 +49,7 @@ const Products = () => {
                     <Butoon title={"Add New"} />
                 </Link>
             </div >
-            <DataTable data = {productsData} columns={columns}/>
+            <DataTable data ={productsData} columnss={columns}/>
         </>
     )
 }
