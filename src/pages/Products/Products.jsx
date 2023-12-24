@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux'
 import { SetLoader } from "../../redux/loadersSlice";
 
 const Products = () => {
+   
     const [productsData , setProductsData] = React.useState([])
     const dispatch = useDispatch();
 
@@ -46,7 +47,7 @@ const Products = () => {
         <>
             <div className="flex items-center justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
                 <div className="flex-1 ">
-                    <Heading title={`Products (0)`} description="Manage Products for your store" />
+                    <Heading title={`Products (${productsData.length})`} description="Manage Products for your store" />
                 </div>
                 <Link to={'/products/new'}>
                     <Butoon title={"Add New"} />

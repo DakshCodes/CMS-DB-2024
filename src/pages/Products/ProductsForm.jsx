@@ -1,6 +1,6 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
-import { Input, Button, Tabs, Tab, Card } from "@nextui-org/react";
+import { Input, Button, Tabs, Tab, Card, ButtonGroup, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import Selected from '../../components/ui/Select';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -12,6 +12,18 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 const ProductsForm = () => {
+    const [selectedOption, setSelectedOption] = React.useState(new Set(["merge"]));
+
+
+    const labelsMap = {
+        merge: "Attributes",
+        squash: "Squash and merge",
+        rebase: "Rebase and merge",
+    }
+
+    // Convert the Set to an Array and get the first value.
+    const selectedOptionValue = Array.from(selectedOption)[0];
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [formValues, setFormValues] = React.useState({
@@ -43,7 +55,7 @@ const ProductsForm = () => {
             const response = await CreateProduct(formValues);
             dispatch(SetLoader(false));
             console.log(response);
-            
+
             if (response.success) {
                 toast.success(response.message)
                 navigate("/products")
@@ -51,7 +63,7 @@ const ProductsForm = () => {
             else {
                 throw new Error(response.message);
             }
-            
+
         } catch (error) {
             dispatch(SetLoader(false));
             console.log(error.message)
@@ -139,8 +151,6 @@ const ProductsForm = () => {
 
                         </div>
 
-
-
                         <Tabs aria-label="Options" color={'primary'} className="font-sans font-bold mt-10" variant="bordered">
                             <Tab key="photos" title="Genral" >
                                 <Card className='px-5 py-4  gap-5 flex-row items-center'>
@@ -182,7 +192,36 @@ const ProductsForm = () => {
                             </Tab>
                             <Tab key="attributes" title="Attributes">
                                 <Card>
-                                    hey
+                                    <ButtonGroup variant="flat">
+                                        <Button className='font-sans font-semibold'>{labelsMap[selectedOptionValue]}</Button>
+                                        <Dropdown placement="bottom-end">
+                                            <DropdownTrigger>
+                                                <Button isIconOnly>
+                                                    <svg fill="none" height="14" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17.9188 8.17969H11.6888H6.07877C5.11877 8.17969 4.63877 9.33969 5.31877 10.0197L10.4988 15.1997C11.3288 16.0297 12.6788 16.0297 13.5088 15.1997L15.4788 13.2297L18.6888 10.0197C19.3588 9.33969 18.8788 8.17969 17.9188 8.17969Z" fill="currentColor" />
+                                                    </svg>
+                                                </Button>
+                                            </DropdownTrigger>
+                                            <DropdownMenu
+                                                disallowEmptySelection
+                                                aria-label="Merge options"
+                                                selectedKeys={selectedOption}
+                                                selectionMode="single"
+                                                onSelectionChange={setSelectedOption}
+                                                className="max-w-[300px]"
+                                            >
+                                                <DropdownItem key="merge" >
+                                                    {labelsMap["merge"]}
+                                                </DropdownItem>
+                                                <DropdownItem key="squash">
+                                                    {labelsMap["squash"]}
+                                                </DropdownItem>
+                                                <DropdownItem key="rebase" >
+                                                    {labelsMap["rebase"]}
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </Dropdown>
+                                    </ButtonGroup>
                                 </Card>
                             </Tab>
                             <Tab key="image" title="Images">
