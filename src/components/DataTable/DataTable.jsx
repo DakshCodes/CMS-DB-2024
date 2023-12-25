@@ -19,9 +19,7 @@ import {
 import { PlusIcon } from "../ui/PlusIcon";
 import { VerticalDotsIcon } from "../ui/VerticalDotsIcon";
 import { SearchIcon } from "../ui/SearchIcon";
-import { ChevronDownIcon } from "../ui/ChevronDownIcon";
-import { statusOptions } from "../../utils/data";
-import { capitalize } from "../../utils/utilss";
+
 
 
 
@@ -76,6 +74,14 @@ const DataTable = ({ data, columnss }) => {
         const cellValue = user[columnKey];
 
         switch (columnKey) {
+            case "id":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user._id}
+                    </p>
+                );
             case "productName":
                 return (
                     <p
@@ -100,10 +106,10 @@ const DataTable = ({ data, columnss }) => {
                         {user.productName}
                     </p>
                 );
-            case "createdAt":
+            case "date":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {user.productName}
+                        {user?.createdAt.split("T")[0]}
                     </div>
                 );
             case "actions":

@@ -31,11 +31,11 @@ const Header = () => {
             label: 'Billboards',
             active: pathname.includes('billboards'),
         },
-        // {
-        //     href: `/categories`,
-        //     label: 'Categories',
-        //     active: pathname.includes('categories'),
-        // },
+        {
+            href: `/categories`,
+            label: 'Categories',
+            active: pathname.includes('categories'),
+        },
         {
             href: `/products`,
             label: 'Products',

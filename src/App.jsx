@@ -6,7 +6,6 @@ import DashboardLayout from './pages/Dashboard/Layout';
 import OverView from './pages/Overview/OverView';
 import BIllBoard from './pages/BillBoard/BIllBoard';
 import Categories from './pages/Categories/Categories';
-import CategoriesForm from './pages/Categories/CategoriesForm';
 import BillBoardFrom from './pages/BillBoard/BillBoardFrom';
 import Sizes from './pages/Sizes/Sizes';
 import SizesForm from './pages/Sizes/SizesForm';
@@ -38,10 +37,6 @@ const routesConfig = [
   {
     path: '/categories',
     element: <Categories />,
-  },
-  {
-    path: '/categories/:id',
-    element: <CategoriesForm />,
   },
   {
     path: '/sizes',
