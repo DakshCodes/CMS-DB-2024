@@ -8,9 +8,6 @@ import BIllBoard from './pages/BillBoard/BIllBoard';
 import Categories from './pages/Categories/Categories';
 import BillBoardFrom from './pages/BillBoard/BillBoardFrom';
 import Sizes from './pages/Sizes/Sizes';
-import SizesForm from './pages/Sizes/SizesForm';
-import Colors from './pages/Colors/Colors';
-import ColorsForm from './pages/Colors/ColorsForm';
 import Products from './pages/Products/Products';
 import ProductsForm from './pages/Products/ProductsForm';
 import Orders from './pages/Orders/Orders';
@@ -21,6 +18,7 @@ import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/Private/PrivateRoute';
 import { Spinner } from "@nextui-org/react";
 import { useSelector } from 'react-redux';
+import Attributes from './pages/Attributes/Attributes';
 
 const routesConfig = [
   // { path: '/login', element: <LoginPage /> },
@@ -43,16 +41,8 @@ const routesConfig = [
     element: <Sizes />,
   },
   {
-    path: '/sizes/:id',
-    element: <SizesForm />,
-  },
-  {
-    path: '/colors',
-    element: <Colors />,
-  },
-  {
-    path: '/colors/:id',
-    element: <ColorsForm />,
+    path: '/attributes',
+    element: <Attributes />,
   },
   {
     path: '/products',
