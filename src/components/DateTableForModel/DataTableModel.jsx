@@ -21,6 +21,7 @@ import { SearchIcon } from "../ui/SearchIcon";
 import { useDispatch } from 'react-redux';
 import { SetLoader } from "../../redux/loadersSlice";
 import toast from 'react-hot-toast';
+import moment from 'moment';
 
 
 
@@ -92,10 +93,11 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         {user?.name}
                     </p>
                 );
-            case "date":
+            case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {user?.createdAt.split("T")[0]}
+                        {/* {user?.createdAt.split("T")[0]} */}
+                        {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
                     </div>
                 );
             case "actions":

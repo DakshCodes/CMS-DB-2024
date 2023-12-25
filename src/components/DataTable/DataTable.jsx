@@ -111,7 +111,6 @@ const DataTable = ({ data, columnss , deleteItem , section}) => {
                     </p>
                 );
             case "createdAt":
-            case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
                         {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
