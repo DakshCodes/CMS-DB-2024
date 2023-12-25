@@ -4,7 +4,7 @@ import DataTable from '../../components/DataTable/DataTable'
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import toast from 'react-hot-toast'
-import { GetProductsData } from '../../apicalls/product'
+import { DeleteProduct, GetProductsData } from '../../apicalls/product'
 import { useDispatch } from 'react-redux'
 import { SetLoader } from "../../redux/loadersSlice";
 
@@ -35,12 +35,30 @@ const Products = () => {
 
     
     const columns = [
+        { name: "Product Image", uid: "product_images" },
         { name: "Product Name", uid: "productName" },
         { name: "Regular Price", uid: "regularPrice" },
         { name: "Sale Price", uid: "salePrice" },
         { name: "Created At", uid: "createdAt" },
         { name: "Actions", uid: "actions" },
     ];
+
+    const deleteItem = async (id) =>{
+        try {
+            dispatch(SetLoader(true));
+            const response = await DeleteProduct(id);
+            dispatch(SetLoader(false));
+            if(response.success){
+                getProductsData();
+                toast.success(response.message)
+            } else{
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message)
+        }
+    }
     
    
     return (
@@ -53,7 +71,7 @@ const Products = () => {
                     <Butoon title={"Add New"} />
                 </Link>
             </div >
-            <DataTable data ={productsData} columnss={columns}/>
+            <DataTable data ={productsData} columnss={columns} deleteItem={deleteItem} section={"products"}/>
         </>
     )
 }

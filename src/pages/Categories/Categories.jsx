@@ -23,6 +23,7 @@ const Categories = () => {
             dispatch(SetLoader(false));
             if (response.success) {
                 setCategoryData(response.category);
+                console.log(categoryData)
             } else {
                 throw new Error(response.message);
             }
@@ -38,9 +39,9 @@ const Categories = () => {
     }, []);
 
     const columns = [
-        { name: "ID", uid: "id", sortable: true },
+        // { name: "ID", uid: "_id", sortable: true },
         { name: "NAME", uid: "name", },
-        { name: "DATE", uid: "date" },
+        { name: "Created At", uid: "createdAt" },
         { name: "ACTIONS", uid: "actions" },
     ];
 
@@ -78,6 +79,10 @@ const Categories = () => {
             toast.error(error.message)
         }
     };
+
+    const deleteItem = (id) =>{
+        console.log("I am from categories" + id)
+    }
 
 
     return (
@@ -123,7 +128,7 @@ const Categories = () => {
                 </div>
                 <Butoon onOpen={onOpen} title={"Add New"} />
             </div >
-            <DataTable data={categoryData} columnss={columns} />
+            <DataTable data={categoryData} deleteItem={deleteItem} columnss={columns} />
         </>
     )
 }

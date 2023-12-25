@@ -5,17 +5,26 @@ import Selected from '../../components/ui/Select';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { UploadImage } from '../../apicalls/user';
-import { CreateProduct } from '../../apicalls/product';
+import { CreateProduct, EditProductById, GetProductDataByID } from '../../apicalls/product';
 import toast from 'react-hot-toast';
 import { SetLoader } from "../../redux/loadersSlice";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 const ProductsForm = () => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const params = useParams();
+
+    const productURL = params.id === "new" ? null : params.id;
+
+
+
+    console.log("my product url : ", productURL)
+
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [imageLinks, setImageLinks] = React.useState([]);
     const [formValues, setFormValues] = React.useState({
         productName: '',
         regularPrice: '',
@@ -27,6 +36,32 @@ const ProductsForm = () => {
     });
 
     const { productName, regularPrice, salePrice, mainDescription, shortDescription, attributes } = formValues;
+
+    React.useEffect(() => {
+        const fetchProductDetails = async (id) => {
+            try {
+                dispatch(SetLoader(true));
+                const response = await GetProductDataByID(id); // Replace with your API call to get product details
+                dispatch(SetLoader(false));
+
+                if (response.success) {
+                    const productDetails = response.data; // Assuming the API response has a 'data' field containing product details
+                    setFormValues(productDetails);
+                    setImageLinks(productDetails.product_images);
+                } else {
+                    throw new Error(response.message);
+                }
+            } catch (error) {
+                dispatch(SetLoader(false));
+                console.error(error.message);
+                toast.error(error.message);
+            }
+        };
+
+        if (productURL) {
+            fetchProductDetails(productURL);
+        }
+    }, [productURL])
 
     const handleChange = (field, value) => {
         setFormValues((prevValues) => ({
@@ -65,14 +100,30 @@ const ProductsForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+
+
         formValues.product_images = imageLinks;
         // Use the 'formValues' object as needed, for example, send it to an API or perform other actions
         console.log('Form Values:', formValues);
 
+
         try {
-            dispatch(SetLoader(true));
-            const response = await CreateProduct(formValues);
-            dispatch(SetLoader(false));
+            let response = {};
+
+            if (productURL) {
+                // edit
+                console.log("Edit form Values -------------", formValues);
+                dispatch(SetLoader(true));
+                response = await EditProductById(formValues, productURL);
+                dispatch(SetLoader(false));
+
+            } else {
+
+                dispatch(SetLoader(true));
+                response = await CreateProduct(formValues);
+                dispatch(SetLoader(false));
+            }
             console.log(response);
 
             if (response.success) {
@@ -91,7 +142,6 @@ const ProductsForm = () => {
     };
 
 
-    const [imageLinks, setImageLinks] = React.useState([]);
 
     const handleImageChange = (e) => {
         const name = e.target.name;
@@ -101,22 +151,26 @@ const ProductsForm = () => {
             [name]: value,
         });
     };
+    
 
     const uploadImage = async (e) => {
         e.preventDefault();
         try {
+            dispatch(SetLoader(true));
             const formData = new FormData();
             formData.append("product_images", formValues.product_images);
             const response = await UploadImage(formData);
+            dispatch(SetLoader(false));
+
             if (response.success) {
-                alert(response.message);
                 const newImageLink = response.url;
                 setImageLinks((prevLinks) => [...prevLinks, newImageLink]);
-
+                toast.success(response.message);
             } else {
                 console.log(response.message);
             }
         } catch (error) {
+            dispatch(SetLoader(false));
             console.log(error.message);
         }
     };
@@ -159,7 +213,7 @@ const ProductsForm = () => {
         <div className="flex-col">
             <div className="flex-1 space-y-8 p-8 pt-6">
                 <div className="flex items-center justify-between border-b  pb-3 ">
-                    <Heading title={"Create Products"} description={"Add a new Prouduct"} />
+                    <Heading title={productURL ? "Edit Products" : "Create Products"} description={!productURL ? "Add a new Prouduct" : "Edit a prodcut"} />
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-8 w-full">
                     <div className="flex w-full flex-col ">
@@ -261,7 +315,7 @@ const ProductsForm = () => {
                                         Add attribute
                                     </Button>
                                     <div className='flex flex-col gap-8 '>
-                                        {attributes.map((attribute, index) => (
+                                        {attributes?.map((attribute, index) => (
                                             <div key={index} className='flex gap-5 max-w-max'>
                                                 <Select
                                                     items={users}

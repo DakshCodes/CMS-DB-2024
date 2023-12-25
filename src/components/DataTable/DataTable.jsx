@@ -19,14 +19,16 @@ import {
 import { PlusIcon } from "../ui/PlusIcon";
 import { VerticalDotsIcon } from "../ui/VerticalDotsIcon";
 import { SearchIcon } from "../ui/SearchIcon";
+import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 
 
 
 
-const DataTable = ({ data, columnss }) => {
+const DataTable = ({ data, columnss , deleteItem , section}) => {
 
-
+    const navigate = useNavigate();
     const [filterValue, setFilterValue] = React.useState("");
     const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
     const [statusFilter, setStatusFilter] = React.useState("all");
@@ -70,17 +72,21 @@ const DataTable = ({ data, columnss }) => {
         });
     }, [sortDescriptor, items]);
 
+    const handleEditForSection = async (id) =>{
+        navigate(`/${section}/${id}`);
+    }
+
     const renderCell = React.useCallback((user, columnKey, index) => {
         const cellValue = user[columnKey];
 
         switch (columnKey) {
-            case "id":
+            case "product_images":
                 return (
-                    <p
-                        className='font-2 font-medium text-[#000]'
+                    <div
+                        className='w-[5rem] h-[5rem] font-2 font-medium text-[#000]'
                     >
-                        {user._id}
-                    </p>
+                        <img className='w-full h-full rounded-lg object-cover' src={user.product_images[1]} alt="" />
+                    </div>
                 );
             case "productName":
                 return (
@@ -95,7 +101,7 @@ const DataTable = ({ data, columnss }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user.productName}
+                        ₹{user.regularPrice}
                     </p>
                 );
             case "salePrice":
@@ -103,13 +109,13 @@ const DataTable = ({ data, columnss }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user.productName}
+                        ₹{user.salePrice}
                     </p>
                 );
-            case "date":
+            case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {user?.createdAt.split("T")[0]}
+                        {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
                     </div>
                 );
             case "actions":
@@ -123,8 +129,8 @@ const DataTable = ({ data, columnss }) => {
                             </DropdownTrigger>
                             <DropdownMenu className='font-2 font-medium text-[#000]'>
                                 <DropdownItem onClick={() => alert(user._id)}>View</DropdownItem>
-                                <DropdownItem onClick={() => alert(user._id)}>Edit</DropdownItem>
-                                <DropdownItem onClick={() => alert(user._id)}>Delete</DropdownItem>
+                                <DropdownItem onClick={() => handleEditForSection(user._id)}>Edit</DropdownItem>
+                                <DropdownItem onClick={() => deleteItem(user._id) || alert(user._id)}>Delete</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -197,6 +203,9 @@ const DataTable = ({ data, columnss }) => {
             </div>
         );
     }, [items.length, page, pages, hasSearchFilter]);
+
+
+
 
     return (
         <Table
