@@ -2,28 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, } from "@nextui-org/react";
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
-import { CreateCategory, DeleteCategory, GetCategoryData, UpdateCategory } from '../../apicalls/category';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { SetLoader } from "../../redux/loadersSlice";
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
+import { CreateAttribute, DeleteAttribute, GetAttributeData, UpdateAttribute } from '../../apicalls/attributes';
 
-const Categories = () => {
+const Attributes = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [CategoryName, SetCategoryName] = useState("")
-    const [updateCategoryId, setUpdateCategoryId] = useState(null)
+    const [AttributeName, SetAttributeName] = useState("")
+    const [updateAttributeId, setUpdateAttributeId] = useState(null)
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [categoryData, setCategoryData] = useState([])
+    const [attributeData, setAttributeData] = useState([]);
 
-    const getCategoryData = async () => {
+    const getAttributeData = async () => {
         try {
             dispatch(SetLoader(true));
-            const response = await GetCategoryData();
+            const response = await GetAttributeData();
             dispatch(SetLoader(false));
             if (response.success) {
-                setCategoryData(response.category);
+                setAttributeData(response.attribute);
             } else {
                 throw new Error(response.message);
             }
@@ -35,10 +35,11 @@ const Categories = () => {
 
 
     useEffect(() => {
-        getCategoryData();
-    }, [setCategoryData]);
+        getAttributeData();
+    }, [setAttributeData]);
 
-    // console.log(categoryData.filter((item) => item._id === "65891a4c00533dad0822f172")[0].name);
+
+    console.log(attributeData)
 
     const columns = [
         { name: "ID", uid: "id", sortable: true },
@@ -53,12 +54,11 @@ const Categories = () => {
         // Use the 'formValues' object as needed, for example, send it to an API or perform other actions
         try {
             dispatch(SetLoader(true));
-            const response = await CreateCategory({ name: CategoryName });
+            const response = await CreateAttribute({ name: AttributeName });
             dispatch(SetLoader(false));
             if (response.success) {
                 toast.success(response.message)
-                setCategoryData(prevData => [...prevData, { _id: response.categoryDoc._id, name: response.categoryDoc.name, createdAt: response.categoryDoc.createdAt, actions: "" }]);
-                navigate("/categories")
+                setAttributeData(prevData => [...prevData, { _id: response.attributeDoc._id, name: response.attributeDoc.name, createdAt: response.attributeDoc.createdAt, actions: "" }]);
             }
             else {
                 throw new Error(response.message);
@@ -70,16 +70,16 @@ const Categories = () => {
             toast.error(error.message)
         }
     };
-    // Update category function
-    const handleDelete = async (categoryId) => {
+    // Update attribute function
+    const handleDelete = async (attributeId) => {
         try {
             dispatch(SetLoader(true));
-            const response = await DeleteCategory(categoryId);
+            const response = await DeleteAttribute(attributeId);
             dispatch(SetLoader(false));
             if (response.success) {
                 toast.success(response.message);
-                // Update categoryData to trigger useEffect
-                setCategoryData(prevData => prevData.filter(category => category._id !== categoryId));
+                // Update attributeData to trigger useEffect
+                setAttributeData(prevData => prevData.filter(attribute => attribute._id !== attributeId));
             } else {
                 throw new Error(response.message);
             }
@@ -93,27 +93,27 @@ const Categories = () => {
     // Update category function
     const handleUpdate = async (categoryId) => {
         try {
-            const response = await GetCategoryData(); // Fetch the latest category data
+            const response = await GetAttributeData(); // Fetch the latest attribute data
             if (response.success) {
-                const existingCategory = response.category.find((cat) => cat._id === categoryId);
-                if (!existingCategory) {
-                    throw new Error("Category not found");
+                const existingAttribute = response.attribute.find((attri) => attri._id === categoryId);
+                if (!existingAttribute) {
+                    throw new Error("Attribute not found");
                 }
 
                 // Open the modal for updating
                 onOpen();
-                console.log(existingCategory.name)
+                console.log(existingAttribute.name)
                 // Set the category name in the state for editing
-                SetCategoryName(existingCategory.name);
+                SetAttributeName(existingAttribute.name);
 
 
                 // Save the category ID for the update function
-                setUpdateCategoryId(categoryId);
+                setUpdateAttributeId(categoryId);
             } else {
                 throw new Error(response.message);
             }
         } catch (error) {
-            console.error("Error updating category:", error.message);
+            console.error("Error updating Attribute:", error.message);
         }
     };
 
@@ -125,20 +125,20 @@ const Categories = () => {
             dispatch(SetLoader(true));
 
             // Call the update API with the updated data
-            const response = await UpdateCategory(updateCategoryId, {
-                name: CategoryName,
+            const response = await UpdateAttribute(updateAttributeId, {
+                name: AttributeName,
             });
 
             dispatch(SetLoader(false));
 
             if (response.success) {
                 toast.success(response.message);
-                // Update categoryData to trigger useEffect
-                setCategoryData((prevData) =>
-                    prevData.map((category) =>
-                        category._id === updateCategoryId
-                            ? { ...category, name: CategoryName }
-                            : category
+                // Update attributeData to trigger useEffect
+                setAttributeData((prevData) =>
+                    prevData.map((attribute) =>
+                        attribute._id === updateAttributeId
+                            ? { ...attribute, name: AttributeName }
+                            : attribute
                     )
                 );
 
@@ -149,7 +149,7 @@ const Categories = () => {
             }
         } catch (error) {
             dispatch(SetLoader(false));
-            console.error("Error updating category:", error.message);
+            console.error("Error updating Attribute:", error.message);
             toast.error(error.message);
         }
     };
@@ -157,7 +157,7 @@ const Categories = () => {
 
     return (
         <>
-            {/* category add model */}
+            {/* attribute add & update model */}
             <Modal
                 isOpen={isOpen}
                 placement={"top-center"}
@@ -168,7 +168,7 @@ const Categories = () => {
                 >
                     {(onClose) => (
                         <>
-                            <ModalHeader className="flex flex-col gap-1">{updateCategoryId ? "Update Category" : "Create Category"}</ModalHeader>
+                            <ModalHeader className="flex flex-col gap-1">{updateAttributeId ? "Update Attribute" : "Create Attribute"}</ModalHeader>
                             <ModalBody>
                                 <Input size={'sm'}
                                     classNames={{
@@ -177,16 +177,16 @@ const Categories = () => {
                                     }}
 
                                     type="text" label="Name"
-                                    onChange={(e) => SetCategoryName(e.target.value)}
-                                    value={CategoryName}
+                                    onChange={(e) => SetAttributeName(e.target.value)}
+                                    value={AttributeName}
                                 />
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button onClick={updateCategoryId ? handleUpdateSubmit : handleSubmit} className='bg-[#000] text-[#fff]' onPress={onClose}>
-                                    {updateCategoryId ? "Update" : "Create "}
+                                <Button onClick={updateAttributeId ? handleUpdateSubmit : handleSubmit} className='bg-[#000] text-[#fff]' onPress={onClose}>
+                                    {updateAttributeId ? "Update" : "Create "}
                                 </Button>
                             </ModalFooter>
                         </>
@@ -195,15 +195,15 @@ const Categories = () => {
             </Modal>
             <div className="flex items-center justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
                 <div className="flex-1 ">
-                    <Heading title={`Categories (${categoryData.length})`} description="Manage categories for your store" />
+                    <Heading title={`Attributes (${attributeData ? attributeData.length : 0})`} description="Manage Attributes for Products" />
                 </div>
                 <Butoon onOpen={onOpen} title={"Add New"} />
             </div >
-            {Array.isArray(categoryData) && (
-                <DataTableModel data={categoryData} setdata={setCategoryData} columnss={columns} deleteitem={handleDelete} update={handleUpdate} />
+            {Array.isArray(attributeData) && (
+                <DataTableModel data={attributeData} columnss={columns} deleteitem={handleDelete} update={handleUpdate} />
             )}
         </>
     )
 }
 
-export default Categories
+export default Attributes

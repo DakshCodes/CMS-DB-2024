@@ -12,23 +12,24 @@ import {
     Dropdown,
     DropdownMenu,
     DropdownItem,
-    Chip,
-    User,
     Pagination,
+    Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure,
 } from "@nextui-org/react";
 import { PlusIcon } from "../ui/PlusIcon";
 import { VerticalDotsIcon } from "../ui/VerticalDotsIcon";
 import { SearchIcon } from "../ui/SearchIcon";
-import { ChevronDownIcon } from "../ui/ChevronDownIcon";
-import { statusOptions } from "../../utils/data";
-import { capitalize } from "../../utils/utilss";
+import { useDispatch } from 'react-redux';
+import { SetLoader } from "../../redux/loadersSlice";
+import toast from 'react-hot-toast';
 
 
 
 
-const DataTable = ({ data, columnss }) => {
+
+const DataTableModel = ({ data, columnss, update, deleteitem }) => {
 
     const [filterValue, setFilterValue] = React.useState("");
+    const dispatch = useDispatch();
     const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
     const [statusFilter, setStatusFilter] = React.useState("all");
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -38,7 +39,7 @@ const DataTable = ({ data, columnss }) => {
     });
     const [page, setPage] = React.useState(1);
 
-    const pages = Math.ceil(data.length / rowsPerPage);
+    const pages = data ? Math.ceil(data.length / rowsPerPage) : 0;
 
     const hasSearchFilter = Boolean(filterValue);
 
@@ -46,7 +47,7 @@ const DataTable = ({ data, columnss }) => {
         let filteredUsers = [...data];
         if (hasSearchFilter) {
             filteredUsers = filteredUsers.filter((user) => {
-                return user?.productName.toLowerCase().includes(filterValue.toLowerCase())
+                return user?.name.toLowerCase().includes(filterValue.toLowerCase())
             });
         }
         return filteredUsers;
@@ -75,34 +76,26 @@ const DataTable = ({ data, columnss }) => {
         const cellValue = user[columnKey];
 
         switch (columnKey) {
-            case "productName":
+            case "id":
                 return (
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user.productName}
+                        {user._id}
                     </p>
                 );
-            case "regularPrice":
+            case "name":
                 return (
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user.productName}
+                        {user?.name}
                     </p>
                 );
-            case "salePrice":
-                return (
-                    <p
-                        className='font-2 font-medium text-[#000]'
-                    >
-                        {user.productName}
-                    </p>
-                );
-            case "createdAt":
+            case "date":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {user.productName}
+                        {user?.createdAt.split("T")[0]}
                     </div>
                 );
             case "actions":
@@ -115,9 +108,8 @@ const DataTable = ({ data, columnss }) => {
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu className='font-2 font-medium text-[#000]'>
-                                <DropdownItem onClick={() => alert(user._id)}>View</DropdownItem>
-                                <DropdownItem onClick={() => alert(user._id)}>Edit</DropdownItem>
-                                <DropdownItem onClick={() => alert(user._id)}>Delete</DropdownItem>
+                                <DropdownItem onClick={() => update(user._id)}>Edit</DropdownItem>
+                                <DropdownItem onClick={() => deleteitem(user._id)}>Delete</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -192,42 +184,45 @@ const DataTable = ({ data, columnss }) => {
     }, [items.length, page, pages, hasSearchFilter]);
 
     return (
-        <Table
-            isCompact
-            removeWrapper
-            aria-label="Example table with custom cells, pagination and sorting"
-            bottomContent={bottomContent}
-            bottomContentPlacement="outside"
-            className='table !mx-4 md:!mx-10'
-            selectedKeys={selectedKeys}
-            sortDescriptor={sortDescriptor}
-            topContent={topContent}
-            topContentPlacement="outside"
-            onSelectionChange={setSelectedKeys}
-            onSortChange={setSortDescriptor}
-        >
-            <TableHeader columns={columnss} >
-                {(column) => (
-                    <TableColumn
-                        key={column.uid}
-                        align={column.uid === "actions" ? "center" : "start"}
-                        allowsSorting={column.sortable}
-                        className="font font-medium text-[#000] "
-                    >
-                        {column.name}
-                    </TableColumn>
-                )}
-            </TableHeader>
-            <TableBody emptyContent={"No users found"} items={sortedItems}>
-                {(item,index) => (
-                    <TableRow key={item._id} >
-                        {(columnKey) => <TableCell >{renderCell(item, columnKey, index)}</TableCell>}
-                    </TableRow>
-                )}
-            </TableBody>
-        </Table>
+        <>
+            <Table
+                isCompact
+                removeWrapper
+                aria-label="Example table with custom cells, pagination and sorting"
+                bottomContent={bottomContent}
+                bottomContentPlacement="outside"
+                className='table !mx-4 md:!mx-10'
+                selectedKeys={selectedKeys}
+                sortDescriptor={sortDescriptor}
+                topContent={topContent}
+                topContentPlacement="outside"
+                onSelectionChange={setSelectedKeys}
+                onSortChange={setSortDescriptor}
+            >
+                <TableHeader columns={columnss} >
+                    {(column) => (
+                        <TableColumn
+                            key={column.uid}
+                            align={column.uid === "actions" ? "center" : "start"}
+                            allowsSorting={column.sortable}
+                            className="font font-medium text-[#000] "
+                        >
+                            {column.name}
+                        </TableColumn>
+                    )}
+                </TableHeader>
+                <TableBody emptyContent={"No users found"} items={sortedItems}>
+                    {(item, index) => (
+                        <TableRow key={item._id} >
+                            {(columnKey) => <TableCell >{renderCell(item, columnKey, index)}</TableCell>}
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </>
+
     );
 }
 
 
-export default DataTable;
+export default DataTableModel;
