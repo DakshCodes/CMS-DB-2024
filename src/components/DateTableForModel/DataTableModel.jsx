@@ -93,10 +93,21 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         {user?.name}
                     </p>
                 );
-            case "createdAt":
+            case "options":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {
+                            user?.options.map((item,index) => {
+                                return <span key={index}>{item.value + " "}</span>
+                            })
+                        }
+                    </p>
+                );
+            case "date":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {/* {user?.createdAt.split("T")[0]} */}
                         {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
                     </div>
                 );
