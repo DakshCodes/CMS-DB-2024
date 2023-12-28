@@ -26,7 +26,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const DataTable = ({ data, columnss , deleteItem , section}) => {
+const DataTable = ({ data, columnss, deleteItem, section }) => {
 
     const navigate = useNavigate();
     const [filterValue, setFilterValue] = React.useState("");
@@ -71,7 +71,7 @@ const DataTable = ({ data, columnss , deleteItem , section}) => {
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
-    const handleEditForSection = async (id) =>{
+    const handleEditForSection = async (id) => {
         navigate(`/${section}/${id}`);
     }
     const renderCell = React.useCallback((user, columnKey, index) => {
@@ -212,7 +212,10 @@ const DataTable = ({ data, columnss , deleteItem , section}) => {
             aria-label="Example table with custom cells, pagination and sorting"
             bottomContent={bottomContent}
             bottomContentPlacement="outside"
-            className='table !mx-4 md:!mx-10'
+            classNames={{
+                base: "max-w-[93rem] mx-auto overflow-scroll",
+                table: "min-w-[18rem]",
+            }}
             selectedKeys={selectedKeys}
             sortDescriptor={sortDescriptor}
             topContent={topContent}

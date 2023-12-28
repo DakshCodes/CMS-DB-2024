@@ -99,7 +99,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         className='font-2 font-medium text-[#000]'
                     >
                         {
-                            user?.options.map((item,index) => {
+                            user?.options.map((item, index) => {
                                 return <span key={index}>{item.value + " "}</span>
                             })
                         }
@@ -196,6 +196,8 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
         );
     }, [items.length, page, pages, hasSearchFilter]);
 
+
+
     return (
         <>
             <Table
@@ -204,7 +206,10 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                 aria-label="Example table with custom cells, pagination and sorting"
                 bottomContent={bottomContent}
                 bottomContentPlacement="outside"
-                className='table !mx-4 md:!mx-10'
+                classNames={{
+                    base: "max-w-[93rem] mx-auto overflow-scroll",
+                    table: "min-w-[18rem]",
+                }}
                 selectedKeys={selectedKeys}
                 sortDescriptor={sortDescriptor}
                 topContent={topContent}
@@ -224,9 +229,11 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         </TableColumn>
                     )}
                 </TableHeader>
-                <TableBody emptyContent={"No users found"} items={sortedItems}>
+                <TableBody
+
+                    emptyContent={"No users found"} items={sortedItems}>
                     {(item, index) => (
-                        <TableRow key={item._id} >
+                        <TableRow key={item._id}    >
                             {(columnKey) => <TableCell >{renderCell(item, columnKey, index)}</TableCell>}
                         </TableRow>
                     )}

@@ -28,8 +28,8 @@
 
 .table {
     width: 95%;
+    @apply sm:w-full md:w-[95%]; 
 }
-
 .table-head {
     background-color: #000 !important;
 }
