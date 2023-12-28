@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, } from "@nextui-org/react";
+import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, SelectItem, Select, } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
+
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import toast from 'react-hot-toast';
@@ -12,11 +14,25 @@ import { CreateAttribute, DeleteAttribute, GetAttributeData, UpdateAttribute } f
 const Attributes = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [AttributeName, SetAttributeName] = useState("");
-    const [AttributeValues, setAttributeValues] = useState([""]); // Array for attribute values
     const [updateAttributeId, setUpdateAttributeId] = useState(null);
+    const [currentValue, setCurrentValue] = useState("");
+    const [attributeValuesTable, setAttributeValuesTable] = useState([]);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [attributeData, setAttributeData] = useState([]);
+
+    const handleAddValue = () => {
+        if (currentValue.trim() !== "") {
+            setAttributeValuesTable((prevValues) => [...prevValues, currentValue.trim()]);
+            setCurrentValue("");
+        }
+    };
+
+    const handleDeleteValue = (index) => {
+        const updatedValues = [...attributeValuesTable];
+        updatedValues.splice(index, 1);
+        setAttributeValuesTable(updatedValues);
+    };
 
     const getAttributeData = async () => {
         try {
@@ -30,13 +46,13 @@ const Attributes = () => {
             }
         } catch (error) {
             dispatch(SetLoader(false));
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
-    // Add a callback function to reset the state when the modal is closed
+    };
+
     const handleCloseModal = () => {
         SetAttributeName("");
-        setAttributeValues([""]);
+        setAttributeValuesTable([]);
         setUpdateAttributeId(null);
     };
 
@@ -46,36 +62,53 @@ const Attributes = () => {
 
     const columns = [
         { name: "ID", uid: "id", sortable: true },
-        { name: "NAME", uid: "name", },
-        { name: "OPTIONS", uid: "options", },
+        { name: "NAME", uid: "name" },
+        { name: "OPTIONS", uid: "options" },
         { name: "DATE", uid: "date" },
         { name: "ACTIONS", uid: "actions" },
     ];
 
+    const isAttributeNameUnique = (name) => {
+        const lowerCaseName = name.toLowerCase();
+        return !attributeData.some((attribute) => attribute.name.toLowerCase() === lowerCaseName);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            if (!isAttributeNameUnique(AttributeName)) {
+                toast.error("Attribute name must be unique.");
+                return;
+            }
+
             dispatch(SetLoader(true));
-            const response = await CreateAttribute({ name: AttributeName, values: AttributeValues });
+            const response = await CreateAttribute({ name: AttributeName, values: attributeValuesTable });
             dispatch(SetLoader(false));
+
             if (response.success) {
-                toast.success(response.message)
-                setAttributeData(prevData => Array.isArray(prevData) ? [...prevData, { _id: response.attributeDoc._id, name: response.attributeDoc.name, options: response.attributeDoc.options, createdAt: response.attributeDoc.createdAt, actions: "" }] : []);
+                toast.success(response.message);
+                setAttributeData((prevData) => [
+                    ...prevData,
+                    {
+                        _id: response.attributeDoc._id,
+                        name: response.attributeDoc.name,
+                        options: response.attributeDoc.options,
+                        createdAt: response.attributeDoc.createdAt,
+                        actions: "",
+                    },
+                ]);
                 SetAttributeName("");
-                setAttributeValues([""]); // Reset the state for AttributeValues
+                setAttributeValuesTable([]);
             } else {
                 throw new Error(response.message);
             }
         } catch (error) {
             dispatch(SetLoader(false));
-            console.log(error.message)
-            toast.error(error.message)
+            console.error(error.message);
+            toast.error(error.message);
         }
     };
 
-
-    // Update attribute function
     const handleDelete = async (attributeId) => {
         try {
             dispatch(SetLoader(true));
@@ -83,7 +116,6 @@ const Attributes = () => {
             dispatch(SetLoader(false));
             if (response.success) {
                 toast.success(response.message);
-                // Update attributeData to trigger useEffect
                 setAttributeData(prevData => prevData.filter(attribute => attribute._id !== attributeId));
             } else {
                 throw new Error(response.message);
@@ -95,27 +127,21 @@ const Attributes = () => {
         }
     };
 
-    // Update attribute function
     const handleUpdate = async (attributeId) => {
         try {
-            const response = await GetAttributeData(); // Fetch the latest attribute data
+            const response = await GetAttributeData();
             if (response.success) {
                 const existingAttribute = response.attributes.find((attr) => attr._id === attributeId);
                 if (!existingAttribute) {
                     throw new Error("Attribute not found");
                 }
 
-                // Open the modal for updating
                 onOpen();
-
-                // Set the attribute name and values in the state for editing
                 SetAttributeName(existingAttribute.name);
 
-                // Extract the 'value' property from each option object
                 const attributeValues = existingAttribute.options.map(option => option.value);
-                setAttributeValues(attributeValues);
+                setAttributeValuesTable(attributeValues);
 
-                // Save the attribute ID for the update function
                 setUpdateAttributeId(attributeId);
             } else {
                 throw new Error(response.message);
@@ -125,22 +151,21 @@ const Attributes = () => {
         }
     };
 
-    console.log(AttributeValues, "values")
-    // Handle update form submission
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
 
         try {
+            if (!isAttributeNameUnique(AttributeName)) {
+                toast.error("Attribute name must be unique.");
+                return;
+            }
             dispatch(SetLoader(true));
 
-            // Call the update API with the updated data
-            const response = await UpdateAttribute(updateAttributeId, { name: AttributeName, values: AttributeValues });
-
+            const response = await UpdateAttribute(updateAttributeId, { name: AttributeName, values: attributeValuesTable });
             dispatch(SetLoader(false));
 
             if (response.success) {
                 toast.success(response.message);
-                // Update attributeData to trigger useEffect
                 setAttributeData((prevData) =>
                     prevData.map((attribute) =>
                         attribute._id === updateAttributeId
@@ -149,7 +174,6 @@ const Attributes = () => {
                     )
                 );
 
-                // Close the modal
                 onOpenChange(false);
             } else {
                 throw new Error(response.message);
@@ -161,8 +185,7 @@ const Attributes = () => {
         }
     };
 
-    console.log(attributeData, "data")
-
+    console.log(attributeValuesTable,"tvalues")
     return (
         <>
             {/* attribute add & update model */}
@@ -194,50 +217,104 @@ const Attributes = () => {
                                     value={AttributeName}
                                 />
                                 {/* Manage attribute values */}
-                                {AttributeValues.map((value, index) => (
-                                    <div className='flex flex-row' key={index}>
-                                        <Input
-                                            type="text"
-                                            placeholder="value"
-                                            labelPlacement="outside"
-                                            classNames={{
-                                                label: "font-bold font-3",
-                                                input: "font-semibold font",
-                                            }}
-                                            value={value}
-                                            onChange={(e) => {
-                                                const newValues = [...AttributeValues];
-                                                newValues[index] = e.target.value;
-                                                setAttributeValues(newValues);
-                                            }}
-                                        />
-                                        {!index == 0 && <Button
-                                            isIconOnly
-                                            color="warning"
-                                            variant="light"
-                                            onClick={() => {
-                                                const newValues = [...AttributeValues];
-                                                newValues.splice(index, 1);
-                                                setAttributeValues(newValues);
-                                            }}
-                                        >
-                                            <svg classname="w-8 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth={0} /><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" /><g id="SVGRepo_iconCarrier"> <path d="M6 12L18 12" stroke="#000000" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> </g></svg>
+                                <div className="flex flex-row">
+                                    <Input
+                                        type="text"
+                                        placeholder="Value"
+                                        labelPlacement="outside"
+                                        classNames={{
+                                            label: "font-bold font-3",
+                                            input: "font-semibold font",
+                                        }}
+                                        value={currentValue}
+                                        onChange={(e) => setCurrentValue(e.target.value)}
+                                    />
+                                    <Button isIconOnly color="warning" variant="light" onClick={handleAddValue}>
+                                        <svg className="w-8 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <g id="SVGRepo_bgCarrier" strokeWidth={0} />
+                                            <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" />
+                                            <g id="SVGRepo_iconCarrier">
+                                                <path d="M9 12H15" stroke="#323232" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M12 9L12 15" stroke="#323232" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                            </g>
+                                        </svg>
+                                    </Button>
+                                </div>
+                                <Table
+                                    classNames={{
+                                        base: "max-h-[120px] overflow-scroll",
+                                        table: "min-h-[70px]",
+                                        th:"text-center",
+                                        tr:"text-center",
+                                        td:"font-sans font-bold"
 
-                                        </Button>
-
-                                        }
-                                    </div>
-                                ))}
-                                <Button
-                                    isIconOnly
-                                    color="warning"
-                                    variant="light"
-                                    className='mx-auto'
-                                    onClick={() => setAttributeValues([...AttributeValues, ""])}
+                                    }}
+                                    aria-label="Attribute Values Table"
                                 >
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth={0} /><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round" /><g id="SVGRepo_iconCarrier"> <path d="M9 12H15" stroke="#323232" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> <path d="M12 9L12 15" stroke="#323232" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> </g></svg>
-
-                                </Button>
+                                    <TableHeader>
+                                        <TableColumn>VALUE</TableColumn>
+                                        <TableColumn>ACTION</TableColumn>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {attributeValuesTable.map((value, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{value}</TableCell>
+                                                <TableCell>
+                                                    <span
+                                                        className="text-lg text-danger cursor-pointer active:opacity-50 flex justify-center items-center"
+                                                        onClick={() => handleDeleteValue(index)}
+                                                    >
+                                                        <svg
+                                                            aria-hidden="true"
+                                                            fill="none"
+                                                            focusable="false"
+                                                            height="1em"
+                                                            role="presentation"
+                                                            viewBox="0 0 20 20"
+                                                            width="1em"
+                                                        >
+                                                            <path
+                                                                d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332"
+                                                                stroke="currentColor"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={1.5}
+                                                            />
+                                                            <path
+                                                                d="M7.08331 4.14169L7.26665 3.05002C7.39998 2.25835 7.49998 1.66669 8.90831 1.66669H11.0916C12.5 1.66669 12.6083 2.29169 12.7333 3.05835L12.9166 4.14169"
+                                                                stroke="currentColor"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={1.5}
+                                                            />
+                                                            <path
+                                                                d="M15.7084 7.61664L15.1667 16.0083C15.075 17.3166 15 18.3333 12.675 18.3333H7.32502C5.00002 18.3333 4.92502 17.3166 4.83335 16.0083L4.29169 7.61664"
+                                                                stroke="currentColor"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={1.5}
+                                                            />
+                                                            <path
+                                                                d="M8.60834 13.75H11.3833"
+                                                                stroke="currentColor"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={1.5}
+                                                            />
+                                                            <path
+                                                                d="M7.91669 10.4167H12.0834"
+                                                                stroke="currentColor"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={1.5}
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
