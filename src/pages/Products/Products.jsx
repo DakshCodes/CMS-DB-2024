@@ -60,6 +60,8 @@ const Products = () => {
         }
     }
     
+
+    console.log(productsData,"productdata")
    
     return (
         <>

@@ -185,7 +185,7 @@ const Attributes = () => {
         }
     };
 
-    console.log(attributeValuesTable,"tvalues")
+    console.log(attributeData,"data")
     return (
         <>
             {/* attribute add & update model */}
