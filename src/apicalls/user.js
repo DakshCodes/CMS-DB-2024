@@ -1,11 +1,12 @@
 import axios from "axios"
+import toast from 'react-hot-toast'
 
 
 export const loginUser = async (payload) => {
   try {
     const response = await axios.post("http://localhost:5000/api/login", payload);
     return response.data;
-
+    const id = response.data.user._id
   } catch (error) {
     return error.message
   }
@@ -43,5 +44,25 @@ export const UploadImage = async(payload) =>{
       
   } catch (error) {
       return error.message;
+  }
+}
+export const UploadProfileImage = async(payload) =>{
+  try {
+      const response = await axios.post(`http://localhost:5000/api/uploadprofileimage`,payload);
+      return response.data;
+      
+  } catch (error) {
+      return error.message;
+  }
+}
+
+export const updateUser = async (payload,id) => {
+  try {
+    const response = await axios.put(`http://localhost:5000/api/updateuser/${id}`,
+   payload);
+    return response.data;
+    
+  } catch (error) {
+    return error.message
   }
 }
