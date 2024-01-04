@@ -26,11 +26,6 @@ const Header = () => {
             label: 'Overview',
             active: pathname === '/',
         },
-        // {
-        //     href: `/billboards`,
-        //     label: 'Billboards',
-        //     active: pathname.includes('billboards'),
-        // },
         {
             href: `/categories`,
             label: 'Categories',
@@ -40,6 +35,11 @@ const Header = () => {
             href: `/attributes`,
             label: 'Attributes',
             active: pathname.includes('attributes'),
+        },
+        {
+            href: `/tags`,
+            label: 'Tags',
+            active: pathname.includes('tags'),
         },
         {
             href: `/products`,
@@ -109,7 +109,7 @@ const Header = () => {
                         </NavbarMenu>
                     </Navbar>
                     <Link to={'/settings'} className="avatar !hidden md:!flex">
-                        <img src={user?.avatar}  alt="Profile" />
+                        <img src={user?.avatar} alt="Profile" />
                     </Link>
                 </div>
             </header>

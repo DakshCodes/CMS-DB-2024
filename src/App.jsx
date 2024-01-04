@@ -19,6 +19,7 @@ import PrivateRoute from './components/Private/PrivateRoute';
 import { Spinner } from "@nextui-org/react";
 import { useSelector } from 'react-redux';
 import Attributes from './pages/Attributes/Attributes';
+import Tags from './pages/Tags/Tags';
 
 const routesConfig = [
   // { path: '/login', element: <LoginPage /> },
@@ -43,6 +44,10 @@ const routesConfig = [
   {
     path: '/attributes',
     element: <Attributes />,
+  },
+  {
+    path: '/tags',
+    element: <Tags />,
   },
   {
     path: '/products',
@@ -87,7 +92,7 @@ function App() {
       <div><Toaster /></div>
       <Header />
       {/* loader */}
-      {loading && <div className="absolute backdrop-blur-sm z-[99] left-0 bottom-0  h-[90vh] w-screen flex justify-center items-center">
+      {loading && <div className="absolute backdrop-blur-sm z-[99] left-0 bottom-0  h-screen w-screen flex justify-center items-center">
         <Spinner size='md' color="current" />
       </div>
       }
