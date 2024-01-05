@@ -29,6 +29,7 @@ import { useDispatch } from 'react-redux';
 import { GetAttributeData } from '../../apicalls/attributes';
 import { GetTagData } from '../../apicalls/tag';
 import { GetHighlightData } from '../../apicalls/highlights';
+import { GetCategoryData } from '../../apicalls/category';
 
 const ProductsForm = () => {
     const navigate = useNavigate();
@@ -44,6 +45,15 @@ const ProductsForm = () => {
     const [stockValue, setStockValue] = useState('');
     // State for selected tag
     const [selectedhighlight, setselectedhighlight] = useState(new Set([]));
+    const [categoriesData, setCategoriesData] = useState([]);
+    const [subCategoryData, setSubCategoryData] = useState([]);
+    const [subSubCategoryData, setSubSubCategoryData] = useState([]);
+
+    const [selectedMainCategory, setSelectedMainCategory] = useState('');
+    const [selectedSubCategory, setSelectedSubCategory] = useState('');
+    const [selectedSubSubCategory, setSelectedSubSubCategory] = useState('');
+
+
 
 
     // const attributes = [
@@ -80,6 +90,9 @@ const ProductsForm = () => {
         salePrice: '',
         mainDescription: '',
         shortDescription: '',
+        main_category: '',
+        sub_category: '',
+        sub_sub_category: '',
         product_images: [],
         attributes: [], // New field to store attributes array of objects
         producthighlights: [], // New field to store attributes array of objects
@@ -190,18 +203,42 @@ const ProductsForm = () => {
         }
     }
 
+    const getCategoryData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetCategoryData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setCategoriesData(response.category);
+                console.log("-----------------------", response.category)
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message)
+        }
+    }
+
     React.useEffect(() => {
         getAttributeData();
         getTagsData();
         getHighlightsData();
+        getCategoryData();
     }, [setTagsData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formValues)
+
+        formValues.main_category = selectedMainCategory;
+        formValues.sub_category = selectedSubCategory;
+        formValues.sub_sub_category = selectedSubSubCategory;
+
+
         formValues.tags = Array.from(selectedtags);
         formValues.product_images = imageLinks;
 
+        console.log("++++++++++++++++++++++++++++++++"+formValues)
 
         try {
             let response = {};
@@ -301,6 +338,26 @@ const ProductsForm = () => {
         setvaluedata(selectedAttributeOne);
         setSelectedAttribute(selectedAttributeOne);
     };
+
+
+    const dependentCategorySelection = (e) => {
+        const selectedCategoryName = e.target.value;
+        console.log("_____________________", selectedCategoryName)
+        const filteredMainCategory = categoriesData.find((category) => category.name === selectedCategoryName);
+        console.log(filteredMainCategory)
+        setSubCategoryData(filteredMainCategory.subcategories);
+    };
+
+
+    const dependentSubCategrySelection = (e) => {
+        const selectedSubCategoryName = e.target.value;
+        console.log("_____________________", selectedSubCategoryName)
+        const filteredSubCategory = subCategoryData.find((category) => category.name === selectedSubCategoryName);
+        console.log(filteredSubCategory)
+        setSubSubCategoryData(filteredSubCategory.items);
+    };
+
+
 
     const handleSelectionChange = (e) => {
         // Check if there is a selected attribute
@@ -748,7 +805,6 @@ const ProductsForm = () => {
                                             th: "text-center",
                                             tr: "text-center",
                                             td: "font-sans font-bold"
-
                                         }}
                                         aria-label="Attribute Values Table"
                                     >
@@ -820,20 +876,92 @@ const ProductsForm = () => {
                                     </Table>
                                 </Card>
                             </Tab>
-                        </Tabs>
-                        <div className='mt-4'>
-                            <div className='font-sans font-semibold my-4'>Short Description</div>
-                            <ReactQuill
-                                theme="snow"
-                                value={shortDescription}
-                                onChange={(value) => handleChange('shortDescription', value)}
-                            />
-                        </div>
+
+                            <Tab key={"product_category"} title="Categories">
+                                <Card className='p-5 gap-2 w-full '>
+                                    <div className='flex items-center gap-6 w-full '>
+                                        <Select
+                                            labelPlacement="inside"
+                                            label="Select Main Category"
+                                            variant='flat'
+                                            classNames={{
+                                                base: " font-sans font-black",
+                                                trigger: "font font-black"
+                                            }}
+                                            onChange={(e) => {
+                                                setSelectedMainCategory(e.target.value);
+                                                dependentCategorySelection(e)
+                                            }}
+                                        >
+                                            {categoriesData.map((category, index) => (
+                                                <SelectItem key={category.name} textValue={category.name}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+
+
+
+                                        <Select
+                                            items={subCategoryData}
+                                            variant='flat'
+                                            label="Select Sub Category"
+                                            labelPlacement='inside'
+                                            isMultiline={true}
+                                            classNames={{
+                                                base: " font-sans font-black",
+                                                trigger: "font py-[10px] font-black"
+                                            }}
+                                            onChange={(e) => {
+                                                setSelectedSubCategory(e.target.value);
+                                                dependentSubCategrySelection(e)
+                                            }}
+                                        >
+                                            {subCategoryData?.map((elem, index) => (
+                                                <SelectItem key={elem?.name} textValue={elem.name} value={elem?.name}>
+                                                    {elem.name}
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+
+
+                                        <Select
+                                            items={subSubCategoryData}
+                                            variant='flat'
+                                            label="Select Sub Sub Category"
+                                            labelPlacement='inside'
+                                            isMultiline={true}
+                                            // placeholder=""
+                                            classNames={{
+                                                base: " font-sans font-black",
+                                                trigger: "font py-[10px] font-black"
+                                            }}
+                                            onChange={(e) => setSelectedSubSubCategory(e.target.value)}
+                                        >
+                                        {subSubCategoryData?.map((elem, index) => (
+                                            <SelectItem key={elem} textValue={elem} value={elem}>
+                                                {elem}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
+
+                            </Card>
+                        </Tab>
+                    </Tabs>
+                    <div className='mt-4'>
+                        <div className='font-sans font-semibold my-4'>Short Description</div>
+                        <ReactQuill
+                            theme="snow"
+                            value={shortDescription}
+                            onChange={(value) => handleChange('shortDescription', value)}
+                        />
                     </div>
-                    <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
-                        Create
-                    </Button>
-                </form>
+            </div>
+            <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
+                Create
+            </Button>
+        </form>
             </div >
         </div >
     )
