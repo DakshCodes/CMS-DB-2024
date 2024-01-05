@@ -83,7 +83,7 @@ const DataTable = ({ data, columnss, deleteItem, section }) => {
                     <div
                         className='w-[5rem] h-[5rem] font-2 font-medium text-[#000]'
                     >
-                        <img className='w-full h-full rounded-lg object-cover' src={user.product_images[1]} alt="" />
+                        <img className='w-full h-full rounded-lg object-cover' src={user.product_images[0]} alt="" />
                     </div>
                 );
             case "productName":

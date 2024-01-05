@@ -217,7 +217,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                 onSelectionChange={setSelectedKeys}
                 onSortChange={setSortDescriptor}
             >
-                <TableHeader columns={columnss} >
+                <TableHeader columns={columnss}>
                     {(column) => (
                         <TableColumn
                             key={column.uid}

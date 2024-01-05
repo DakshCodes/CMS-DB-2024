@@ -287,6 +287,8 @@ const ProductsForm = () => {
     };
 
 
+
+
     const removeAttributeFromTable = (index) => {
         const newTableData = [...tableData];
         newTableData.splice(index, 1);
