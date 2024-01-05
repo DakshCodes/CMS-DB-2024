@@ -42,6 +42,11 @@ const Header = () => {
             active: pathname.includes('tags'),
         },
         {
+            href: `/highlights`,
+            label: 'Highlights',
+            active: pathname.includes('highlights'),
+        },
+        {
             href: `/products`,
             label: 'Products',
             active: pathname.includes('products'),

@@ -20,6 +20,7 @@ import { Spinner } from "@nextui-org/react";
 import { useSelector } from 'react-redux';
 import Attributes from './pages/Attributes/Attributes';
 import Tags from './pages/Tags/Tags';
+import ItemHighlight from './pages/ProductHighlight/ItemHighlight';
 
 const routesConfig = [
   // { path: '/login', element: <LoginPage /> },
@@ -48,6 +49,10 @@ const routesConfig = [
   {
     path: '/tags',
     element: <Tags />,
+  },
+  {
+    path: '/highlights',
+    element: <ItemHighlight />,
   },
   {
     path: '/products',

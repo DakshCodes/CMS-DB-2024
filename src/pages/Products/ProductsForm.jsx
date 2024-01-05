@@ -28,6 +28,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { GetAttributeData } from '../../apicalls/attributes';
 import { GetTagData } from '../../apicalls/tag';
+import { GetHighlightData } from '../../apicalls/highlights';
 
 const ProductsForm = () => {
     const navigate = useNavigate();
@@ -38,9 +39,31 @@ const ProductsForm = () => {
     const [valuedata, setvaluedata] = useState('');
     const [selectvalue, setselectvalue] = useState(new Set([]));
     const [selectedtags, setSelectedtags] = useState(new Set([]));
+    const [selectedValues, setSelectedValues] = useState(new Set([]));
     const [selectedAttribute, setSelectedAttribute] = useState(null);
+    const [stockValue, setStockValue] = useState('');
     // State for selected tag
-    const [selectedTag, setSelectedTag] = useState(new Set([]));
+    const [selectedhighlight, setselectedhighlight] = useState(new Set([]));
+
+
+    // const attributes = [
+    //     [
+    //         { size: "small" },
+    //         { color: "red" },
+    //         { stock: "50" },
+    //     ],
+    //     [
+    //         { name: "daksh" },
+    //         { name: "daksh" },
+    //         { name: "daksh" },
+    //     ],
+    //     [
+    //         { name: "daksh" },
+    //         { name: "daksh" },
+    //         { name: "daksh" },
+    //     ],
+    // ]
+
 
     // State for input value
     const [inputValue, setInputValue] = useState('');
@@ -51,7 +74,6 @@ const ProductsForm = () => {
     const productURL = params.id === 'new' ? null : params.id;
 
     const [imageLinks, setImageLinks] = React.useState([]);
-    const [selectedRowIndex, setSelectedRowIndex] = useState(null);
     const [formValues, setFormValues] = React.useState({
         productName: '',
         regularPrice: '',
@@ -76,8 +98,22 @@ const ProductsForm = () => {
 
                 if (response.success) {
                     const productDetails = response.data;
-                    setFormValues({ ...productDetails, attributes: [] });
+                    console.log(productDetails, "details");
+
+                    // Update the product details and handle additional data as needed
+                    const updatedProductDetails = {
+                        ...productDetails,
+                        attributes: productDetails.attributes || [], // Ensure attributes is an array
+                        producthighlights: productDetails.producthighlights || [], // Ensure producthighlights is an array
+                        tags: productDetails.tags || [], // Ensure tags is an array
+                    };
+
+                    // Set data in tables
+                    setFormValues(updatedProductDetails);
                     setImageLinks(productDetails.product_images);
+                    setTableData(updatedProductDetails.attributes || []);
+                    setHighlightsValuesTable(updatedProductDetails.producthighlights || []);
+                    setSelectedtags(new Set(updatedProductDetails.tags || []));
                 } else {
                     throw new Error(response.message);
                 }
@@ -108,7 +144,6 @@ const ProductsForm = () => {
             dispatch(SetLoader(false));
             if (response.success) {
                 setTagsData(response.tag);
-                console.log(response.tag)
             } else {
                 throw new Error(response.message);
             }
@@ -136,17 +171,37 @@ const ProductsForm = () => {
         }
     };
 
+    const [highlightsData, setHighlightsData] = useState([])
+
+    const getHighlightsData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetHighlightData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setHighlightsData(response.highlight);
+                console.log(highlightsData)
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message)
+        }
+    }
+
     React.useEffect(() => {
         getAttributeData();
         getTagsData();
+        getHighlightsData();
     }, [setTagsData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        formValues.tags = selectedtags;
+        console.log(formValues)
+        formValues.tags = Array.from(selectedtags);
         formValues.product_images = imageLinks;
 
-        console.log(formValues)
 
         try {
             let response = {};
@@ -205,34 +260,29 @@ const ProductsForm = () => {
         }
     };
 
-    const changeSelect = (e) => {
-        const selectedAttributeName = e.target.value;
-        const selectedAttribute = attributeData.find((attribute) => attribute.name === selectedAttributeName);
-        setvaluedata(selectedAttribute);
-        setSelectedAttribute(selectedAttribute);
-    };
 
-    const addAttributeToTable = (stock) => {
+    const addAttributeToTable = () => {
         if (selectedAttribute) {
+
+            // console.log(selectvalue, "value")
             // Add new row
             const newTableData = [
                 ...tableData,
-                {
-                    values: selectvalue,
-                    stock: stock,
-                },
+                selectvalue
             ];
 
             setTableData(newTableData);
 
-            // Update the formValues with the new attribute
-            setFormValues((prevValues) => ({
-                ...prevValues,
-                attributes: newTableData.map((attribute) => ({
-                    values: attribute.values,
-                    stock: attribute.stock,
-                })),
-            }));
+            setselectvalue(null);
+            setvaluedata('');
+            setSelectedAttribute(null);
+            setSelectedValues([])
+
+            // // Update the formValues with the new attribute
+            // setFormValues((prevValues) => ({
+            //     ...prevValues,
+            //     attributes: newTableData
+            // }));
         }
     };
 
@@ -241,22 +291,36 @@ const ProductsForm = () => {
         const newTableData = [...tableData];
         newTableData.splice(index, 1);
         setTableData(newTableData);
-
-        // Update the formValues without the removed attribute
-        setFormValues((prevValues) => ({
-            ...prevValues,
-            attributes: prevValues.attributes.filter((_, i) => i !== index),
-        }));
     };
+
+    const changeSelect = (e) => {
+        const selectedAttributeName = e.target.value;
+        const selectedAttributeOne = attributeData.find((attribute) => attribute.name === selectedAttributeName);
+        setvaluedata(selectedAttributeOne);
+        setSelectedAttribute(selectedAttributeOne);
+    };
+
+    const handleSelectionChange = (e) => {
+        // Check if there is a selected attribute
+        if (selectedAttribute) {
+            setSelectedValues(e.target.value.split(","));
+            const selectedValues = e.target.value.split(",");
+            setselectvalue({
+                name: selectedAttribute.name,
+                values: Array.from(selectedValues)
+            });
+
+        }
+    };
+
+
+
 
     const handletagsSelectionChange = (e) => {
         setSelectedtags(e.target.value.split(","));
     };
-    const handleSelectionChange = (e) => {
-        setselectvalue(e.target.value.split(","));
-    };
-    const handleSelectedTagChange = (e) => {
-        setSelectedTag(e.target.value)
+    const handleSelectedHighlightChange = (e) => {
+        setselectedhighlight(e.target.value)
     };
 
 
@@ -267,12 +331,12 @@ const ProductsForm = () => {
 
     // Function to handle "plus" button click
     const handlePlusButtonClick = () => {
-        if (selectedTag && inputValue) {
+        if (selectedhighlight && inputValue) {
             // Create a new row object
             const newTableData = [
                 ...highlightsValuesTable,
                 {
-                    highlight: selectedTag,
+                    highlight: selectedhighlight,
                     value: inputValue,
                 }
             ];
@@ -289,7 +353,7 @@ const ProductsForm = () => {
                 })),
             }));
             // Clear selected tag and input value
-            setSelectedTag(null);
+            setselectedhighlight(null);
             setInputValue('');
         }
     };
@@ -301,7 +365,25 @@ const ProductsForm = () => {
         setHighlightsValuesTable(updatedTable);
     };
 
+    // stock add
+    const handleStockAddTable = () => {
+        setTableData([...tableData, { stock: stockValue }]);
+        setStockValue('')
+    };
+    // inventory add
+    const handleInventory = () => {
+        if (tableData) {
+            setFormValues((prevValues) => ({
+                ...prevValues,
+                attributes: tableData,
+            }));
+        }
+        setTableData([]);
+    };
 
+
+    console.log(selectvalue, "values")
+    console.log(tableData, "table")
 
     return (
         <div className="flex-col">
@@ -373,15 +455,16 @@ const ProductsForm = () => {
                                 </Card>
                             </Tab>
                             <Tab key="attributes" title="Attributes">
-                                <Card className='px-5 py-5 flex gap-5'>
+                                <Card className='px-10 py-10 flex flex-row justify-start max-w-max'>
                                     <div className='flex flex-col gap-8 '>
-                                        <div className='flex gap-5 items-center'>
+                                        <div className='flex gap-3 items-center px-4 w-[35rem]'>
                                             {/* Select for attribute name */}
                                             <Select
                                                 placeholder="Select Attribute"
                                                 labelPlacement="outside"
                                                 variant='flat'
                                                 classNames={{
+                                                    base: "max-w-[12rem] font-sans font-black",
                                                     trigger: "font font-black"
                                                 }}
                                                 onChange={(e) => changeSelect(e)}
@@ -399,8 +482,10 @@ const ProductsForm = () => {
                                                 selectionMode="multiple"
                                                 placeholder="Values"
                                                 classNames={{
+                                                    base: "max-w-[10rem] font-sans font-black",
                                                     trigger: "font py-[10px] font-black"
                                                 }}
+                                                selectedKeys={selectedValues}
                                                 onChange={handleSelectionChange}
 
                                                 renderValue={(items) => {
@@ -419,20 +504,8 @@ const ProductsForm = () => {
                                                     </SelectItem>
                                                 ))}
                                             </Select>
-                                            {/* Stock field */}
-                                            <Input
-                                                type="number"
-                                                placeholder="Stock"
-                                                labelPlacement="outside"
-                                                classNames={{
-                                                    input: 'font-[600] font-sans',
-                                                }}
-                                                value={valuedata?.stock}
-                                                onChange={(e) => setvaluedata((prevData) => ({ ...prevData, stock: e.target.value }))}
-                                            />
-
                                             {/* Plus button to add attribute to the table */}
-                                            <Button isIconOnly color="warning" variant="light" onClick={() => addAttributeToTable(valuedata.stock)}>
+                                            <Button isIconOnly color="warning" variant="light" onClick={addAttributeToTable}>
                                                 <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M12 5.66669V18.3334M5.66667 12H18.3333"
@@ -447,21 +520,21 @@ const ProductsForm = () => {
 
                                         <Table
                                             classNames={{
-                                                base: "max-h-[120px] overflow-scroll  ",
+                                                base: "max-h-[120px] max-w-xl p-0 overflow-scroll  ",
                                                 table: "min-h-[70px]",
                                             }}
                                             aria-label="Attribute Values Table"
                                         >
                                             <TableHeader>
-                                                <TableColumn>VALUE</TableColumn>
-                                                <TableColumn>STOCK</TableColumn>
+                                                <TableColumn>NAME</TableColumn>
+                                                <TableColumn>VALUES</TableColumn>
                                                 <TableColumn>ACTIONS</TableColumn>
                                             </TableHeader>
                                             <TableBody>
-                                                {tableData.map((attribute, index) => (
+                                                {tableData.map((object, index) => (
                                                     <TableRow key={index}>
-                                                        <TableCell>{attribute.values}</TableCell>
-                                                        <TableCell>{attribute.stock}</TableCell>
+                                                        <TableCell>{object.stock ? "Stock" : object.name}</TableCell>
+                                                        <TableCell>{object.values ? object.values.join(', ') : object.stock}</TableCell>
                                                         <TableCell className='flex gap-4'>
                                                             {/* Edit and delete buttons for each row */}
 
@@ -521,7 +594,35 @@ const ProductsForm = () => {
                                                 ))}
                                             </TableBody>
                                         </Table>
+                                        {/* Stock field */}
+                                        <div className='flex flex-row items-center gap-5 px-4'>
+                                            <Input
+                                                type="number"
+                                                placeholder="Stock"
+                                                labelPlacement="outside"
+                                                classNames={{
+                                                    base: "max-w-[8rem] ",
+                                                    input: 'font-[600] font-sans',
+                                                }}
+                                                value={stockValue}
+                                                onChange={(e) => setStockValue(e.target.value)}
+                                            />
+                                            <Button isIconOnly color="warning" variant="light" onClick={handleStockAddTable}>
+                                                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M12 5.66669V18.3334M5.66667 12H18.3333"
+                                                        stroke="#000"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    />
+                                                </svg>
+                                            </Button>
+                                        </div>
                                     </div>
+                                    <Button isLoading={false} onClick={handleInventory} className="font-sans text-[#fff] bg-[#000] font-[600] m-auto">
+                                        Put Stock
+                                    </Button>
                                 </Card>
                             </Tab>
                             <Tab key="image" title="Images">
@@ -571,6 +672,7 @@ const ProductsForm = () => {
                                                 trigger: "min-h-unit-12 py-2 font font-black",
                                             }}
                                             onChange={handletagsSelectionChange}
+                                            selectedKeys={selectedtags}
                                             renderValue={(items) => {
                                                 return (
                                                     <div className="flex flex-wrap gap-2">
@@ -598,7 +700,7 @@ const ProductsForm = () => {
                                     <h1 className='font-sans font-semibold px-1 '>Highlights For Product</h1>
                                     <div className='flex gap-7 items-center justify-center max-w-xl'>
                                         <Select
-                                            items={tagsData}
+                                            items={highlightsData}
                                             variant="flat"
                                             placeholder="Select a Highlight"
                                             labelPlacement="outside"
@@ -606,12 +708,12 @@ const ProductsForm = () => {
                                                 base: "max-w-xs font-sans font-black",
                                                 trigger: "min-h-unit-12 py-2 font-sans",
                                             }}
-                                            key={selectedTag}
-                                            onChange={handleSelectedTagChange}
+                                            key={selectedhighlight}
+                                            onChange={handleSelectedHighlightChange}
                                         >
-                                            {(tag) => (
-                                                <SelectItem key={tag.name} textValue={tag.name}>
-                                                    <span className="font-sans font-semibold">{tag.name}</span>
+                                            {(highlight) => (
+                                                <SelectItem key={highlight.name} textValue={highlight.name}>
+                                                    <span className="font-sans font-semibold">{highlight.name}</span>
                                                 </SelectItem>
                                             )}
                                         </Select>
@@ -639,7 +741,7 @@ const ProductsForm = () => {
                                     </div>
                                     <Table
                                         classNames={{
-                                            base: "max-h-[120px] max-w-[700px] border rounded-[14px] overflow-scroll",
+                                            base: "max-h-[120px] max-w-[1000px] border rounded-[14px] overflow-scroll",
                                             table: "min-h-[70px]",
                                             th: "text-center",
                                             tr: "text-center",
@@ -730,7 +832,7 @@ const ProductsForm = () => {
                         Create
                     </Button>
                 </form>
-            </div>
+            </div >
         </div >
     )
 }
