@@ -138,10 +138,13 @@ const Categories = () => {
 
                 // Open the modal for updating
                 onOpen();
-                console.log(existingCategory.name)
-                // Set the category name in the state for editing
-                SetCategoryName(existingCategory.name);
+                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=",existingCategory)
+                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=",categoryId)
 
+                tableData.type = existingCategory.name;
+                tableData.value = existingCategory.subcategories;
+
+                console.log("table data =>  ",tableData)
 
                 // Save the category ID for the update function
                 setUpdateCategoryId(categoryId);
@@ -152,6 +155,8 @@ const Categories = () => {
             console.error("Error updating category:", error.message);
         }
     };
+
+
 
     // Handle update form submission
     const handleUpdateSubmit = async (e) => {
@@ -487,7 +492,7 @@ const Categories = () => {
             </div >
             {
                 Array.isArray(categoryData) && (
-                    <DataTableModel data={categoryData} setdata={setCategoryData} columnss={columns} deleteitem={handleDelete} update={handleUpdate} />
+                    <DataTableModel data={categoryData} setdata={setCategoryData} columnss={columns} isOpen={isOpen} deleteitem={handleDelete} update={handleUpdate} />
                 )
             }
         </>
