@@ -87,37 +87,35 @@ const Categories = () => {
     };
 
     const handleAddToTable = () => {
-        // Check if the main category already exists in tableData
-        const existingDataIndex = tableData.findIndex((data) => data.type === categoryName);
+        const newSubcategories = subcategories.map((subcategory) => ({
+            name: subcategory.name,
+            items: subcategory.items,
+        }));
 
-        if (existingDataIndex !== -1) {
-            // Main category already exists, update its subcategories
-            const updatedTableData = [...tableData];
-            updatedTableData[existingDataIndex].value = [
-                ...updatedTableData[existingDataIndex].value,
-                ...subcategories.map((subcategory) => ({
-                    name: subcategory.name,
-                    items: subcategory.items,
-                })),
-            ];
+        setTableData((prevData) => {
+            const existingDataIndex = prevData.findIndex((data) => data.type === categoryName);
 
-            setTableData(updatedTableData);
-        } else {
-            // Main category doesn't exist, add it to tableData
-            const newData = {
-                type: categoryName,
-                value: subcategories.map((subcategory) => ({
-                    name: subcategory.name,
-                    items: subcategory.items,
-                })),
-            };
-            setTableData([...tableData, newData]);
-        }
+            if (existingDataIndex !== -1) {
+                // Main category already exists, update its subcategories
+                const updatedData = [...prevData];
+                updatedData[existingDataIndex].value = [
+                    ...updatedData[existingDataIndex].value,
+                    ...newSubcategories,
+                ];
+                return updatedData;
+            } else {
+                // Main category doesn't exist, add it to tableData
+                return [...prevData, { type: categoryName, value: newSubcategories }];
+            }
+        });
+
 
         // Reset the input fields after adding to the table
         SetCategoryName("");
         setSubcategories([{ name: "", items: [""] }]);
     };
+
+
 
     const removeAttributeFromTable = (index) => {
         const newTableData = [...tableData];
@@ -138,13 +136,13 @@ const Categories = () => {
 
                 // Open the modal for updating
                 onOpen();
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=",existingCategory)
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=",categoryId)
+                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=", existingCategory)
+                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=", categoryId)
 
                 tableData.type = existingCategory.name;
                 tableData.value = existingCategory.subcategories;
 
-                console.log("table data =>  ",tableData)
+                console.log("table data =>  ", tableData)
 
                 // Save the category ID for the update function
                 setUpdateCategoryId(categoryId);
@@ -199,6 +197,8 @@ const Categories = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Use the 'formValues' object as needed, for example, send it to an API or perform other actions
+        console.log("Table data " , tableData);
+
         console.log(prepareCategoryValues())
         try {
             dispatch(SetLoader(true));
@@ -220,13 +220,19 @@ const Categories = () => {
         }
     };
     const prepareCategoryValues = () => {
-        const categoryValues = tableData.map((data) => ({
-            name: data.type,
-            subcategories: data.value.map((subcategory) => ({
+        if (tableData.length === 0) {
+            return null; // or handle the case where there is no data
+        }
+
+        const firstCategory = tableData[0];
+
+        const categoryValues = {
+            name: firstCategory.type,
+            subcategories: firstCategory.value.map((subcategory) => ({
                 name: subcategory.name,
                 items: subcategory.items,
             })),
-        }));
+        };
 
         return categoryValues;
         // Send categoryValues to the backend API here
@@ -386,7 +392,7 @@ const Categories = () => {
                                             </TableHeader>
                                             <TableBody>
                                                 {tableData.map((data, index) => (
-                                                    
+
                                                     <TableRow key={index}>
                                                         <TableCell>{data.type}</TableCell>
                                                         <TableCell>
@@ -465,7 +471,7 @@ const Categories = () => {
                                                 ))}
                                             </TableBody>
 
-                                            
+
                                         </Table>
                                     </div>
                                 </div>
