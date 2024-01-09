@@ -2,7 +2,7 @@ import axios from "axios"
 
 export const CreateCategory = async (payload) => {
     try {
-        const response = await axios.post("http://localhost:5000/api/category/create-category", payload);
+        const response = await axios.post(`${import.meta.env.VITE_SERVER}/api/category/create-category`, payload);
         return response.data;
 
     } catch (error) {
@@ -12,7 +12,7 @@ export const CreateCategory = async (payload) => {
 
 export const GetCategoryData = async () => {
     try {
-        const response = await axios.get("http://localhost:5000/api/category/get-all-category");
+        const response = await axios.get(`${import.meta.env.VITE_SERVER}/api/category/get-all-category`);
         return response.data;
 
     } catch (error) {
@@ -22,7 +22,7 @@ export const GetCategoryData = async () => {
 export const DeleteCategory = async (id) => {
     try {
 
-        const response = await axios.delete(`http://localhost:5000/api/category/delete-category/${id}`);
+        const response = await axios.delete(`${import.meta.env.VITE_SERVER}/api/category/delete-category/${id}`);
         return response.data;
 
     } catch (error) {
@@ -32,7 +32,7 @@ export const DeleteCategory = async (id) => {
 
 export const UpdateCategory = async (id, payload) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/category/update-category/${id}`,payload);
+        const response = await axios.put(`${import.meta.env.VITE_SERVER}/api/category/update-category/${id}`,payload);
         return response.data;
 
     } catch (error) {
