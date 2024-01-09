@@ -80,7 +80,7 @@ const ProductsForm = () => {
         tags: [], // New field to store tags array of objects
     });
 
-    const { productName, regularPrice, salePrice, mainDescription, shortDescription } = formValues;
+    const { productName, regularPrice, salePrice, mainDescription, shortDescription, main_category, sub_category, sub_sub_category, product_images, attributes, producthighlights, tags } = formValues;
 
 
     React.useEffect(() => {
@@ -219,8 +219,14 @@ const ProductsForm = () => {
         formValues.tags = Array.from(selectedtags);
         formValues.attributes = mainstockTable;
         formValues.product_images = imageLinks;
-        
+
         console.log(formValues)
+
+
+        // Validate fields
+        if (!validateFields(formValues)) {
+            return;
+        }
 
         try {
             let response = {};
@@ -422,6 +428,94 @@ const ProductsForm = () => {
         newTableData.splice(index, 1);
         setmainstockTable(newTableData);
     };
+
+
+    // validation function
+
+    const validateFields = (formValues) => {
+
+        const { productName, regularPrice, salePrice, mainDescription, shortDescription, main_category, sub_category, sub_sub_category, product_images, attributes, producthighlights, tags } = formValues;
+
+        // Check if Product Name is empty
+        if (!productName) {
+            toast.error('Please fill in the Product Name');
+            return false;
+        }
+
+        // Check if Main Description is empty
+        if (!mainDescription) {
+            toast.error('Please fill in the Main Description');
+            return false;
+        }
+
+        // Check if Regular Price is empty
+        if (!regularPrice) {
+            toast.error('Please fill in the Regular Price');
+            return false;
+        }
+
+        // Check if Sale Price is empty
+        if (!salePrice) {
+            toast.error('Please fill in the Sale Price');
+            return false;
+        }
+
+        // Check if Sale Price is empty
+        if (!shortDescription) {
+            toast.error('Please fill in the shortDescription');
+            return false;
+        }
+
+        // Check if Sale Price is empty
+        if (!main_category) {
+            toast.error('Please fill in the main_category');
+            return false;
+        }
+        // Check if sub_category is empty
+        if (!sub_category) {
+            toast.error('Please fill in the sub_category');
+            return false;
+        }
+        // Check if sub_category is empty
+        if (!sub_sub_category) {
+            toast.error('Please fill in the sub_sub_category');
+            return false;
+        }
+        // Check if product_images is empty
+        if (!product_images) {
+            toast.error('Please fill in the product_images');
+            return false;
+        }
+        // Check if sub_category is empty
+        if (!product_images) {
+            toast.error('Please fill in the product_images');
+            return false;
+        }
+
+        // Check if Attributes array is empty
+        if (!attributes || attributes.length === 0) {
+            toast.error('Please fill in the Attributes');
+            return false;
+        }
+
+        // Check if Product Highlights array is empty
+        if (!producthighlights || producthighlights.length === 0) {
+            toast.error('Please fill in the Product Highlights');
+            return false;
+        }
+
+        // Check if Tags array is empty
+        if (!tags || tags.length === 0 || !tags[0]) {
+            toast.error('Please fill in the Tags');
+            return false;
+        }
+
+
+        // Add similar checks for other fields
+
+        return true;
+    };
+
 
 
     return (
@@ -999,30 +1093,30 @@ const ProductsForm = () => {
                                             }}
                                             onChange={(e) => setSelectedSubSubCategory(e.target.value)}
                                         >
-                                        {subSubCategoryData?.map((elem, index) => (
-                                            <SelectItem key={elem} textValue={elem} value={elem}>
-                                                {elem}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                </div>
+                                            {subSubCategoryData?.map((elem, index) => (
+                                                <SelectItem key={elem} textValue={elem} value={elem}>
+                                                    {elem}
+                                                </SelectItem>
+                                            ))}
+                                        </Select>
+                                    </div>
 
-                            </Card>
-                        </Tab>
-                    </Tabs>
-                    <div className='mt-4'>
-                        <div className='font-sans font-semibold my-4'>Short Description</div>
-                        <ReactQuill
-                            theme="snow"
-                            value={shortDescription}
-                            onChange={(value) => handleChange('shortDescription', value)}
-                        />
+                                </Card>
+                            </Tab>
+                        </Tabs>
+                        <div className='mt-4'>
+                            <div className='font-sans font-semibold my-4'>Short Description</div>
+                            <ReactQuill
+                                theme="snow"
+                                value={shortDescription}
+                                onChange={(value) => handleChange('shortDescription', value)}
+                            />
+                        </div>
                     </div>
-            </div>
-            <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
-                Create
-            </Button>
-        </form>
+                    <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
+                        Create
+                    </Button>
+                </form>
             </div >
         </div >
     )
