@@ -32,6 +32,11 @@ const Header = () => {
             active: pathname.includes('categories'),
         },
         {
+            href: `/parentCategory`,
+            label: 'Parent Category',
+            active: pathname.includes('parentCategory'),
+        },
+        {
             href: `/attributes`,
             label: 'Attributes',
             active: pathname.includes('attributes'),

@@ -90,7 +90,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user?.name}
+                        {user?.name || user?.parentCategory}
                     </p>
                 );
             case "options":
@@ -106,6 +106,12 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     </p>
                 );
             case "date":
+                return (
+                    <div className="font-2 font-medium text-[#000]">
+                        {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
+                    </div>
+                );
+            case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
                         {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}

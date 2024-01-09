@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, } from "@nextui-org/react";
+import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Select, SelectItem, } from "@nextui-org/react";
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import { CreateCategory, DeleteCategory, GetCategoryData, UpdateCategory } from '../../apicalls/category';
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { SetLoader } from "../../redux/loadersSlice";
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
+import { GetParentCategoryData } from '../../apicalls/parentCategory';
 
 const Categories = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -19,6 +20,10 @@ const Categories = () => {
     const [categoryName, setCategoryName] = useState(""); // State to hold main category name
     const [subcategories, setSubcategories] = useState([{ name: "", items: [""] }]);
     const [tableData, setTableData] = useState([]);
+    const [parentCatgData, setParentCatgData] = useState([]);
+    const [selectedParentCategory, setSelectedParentCategory] = useState('');
+
+
 
 
 
@@ -105,7 +110,7 @@ const Categories = () => {
                 return updatedData;
             } else {
                 // Main category doesn't exist, add it to tableData
-                return [...prevData, { type: categoryName, value: newSubcategories }];
+                return [...prevData, { type: selectedParentCategory, value: newSubcategories }];
             }
         });
 
@@ -114,6 +119,8 @@ const Categories = () => {
         SetCategoryName("");
         setSubcategories([{ name: "", items: [""] }]);
     };
+
+    console.log("---------------------->", selectedParentCategory)
 
 
 
@@ -134,15 +141,19 @@ const Categories = () => {
                     throw new Error("Category not found");
                 }
 
+                console.log("______________________", existingCategory)
                 // Open the modal for updating
                 onOpen();
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=", existingCategory)
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++=", categoryId)
 
-                tableData.type = existingCategory.name;
-                tableData.value = existingCategory.subcategories;
+                setTableData([{
+                    type: existingCategory.parentCategory,
+                    value: existingCategory.subcategories.map((subcategory) => ({
+                        name: subcategory.name,
+                        items: subcategory.items,
+                    })),
+                }]);
 
-                console.log("table data =>  ", tableData)
+                // console.log("table data =>  ", tableData)
 
                 // Save the category ID for the update function
                 setUpdateCategoryId(categoryId);
@@ -153,6 +164,8 @@ const Categories = () => {
             console.error("Error updating category:", error.message);
         }
     };
+
+    console.log("Table -> ", tableData)
 
 
 
@@ -197,7 +210,11 @@ const Categories = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         // Use the 'formValues' object as needed, for example, send it to an API or perform other actions
-        console.log("Table data " , tableData);
+        console.log("Table data ", tableData);
+        console.log("Table data inside 1 level ", tableData.map(item => item.value));
+        console.log("Table data inside the value", tableData.map(item =>
+            item.value.forEach(elem => console.log(elem))
+        ));
 
         console.log(prepareCategoryValues())
         try {
@@ -220,23 +237,73 @@ const Categories = () => {
         }
     };
     const prepareCategoryValues = () => {
+
         if (tableData.length === 0) {
             return null; // or handle the case where there is no data
         }
 
-        const firstCategory = tableData[0];
-
         const categoryValues = {
-            name: firstCategory.type,
-            subcategories: firstCategory.value.map((subcategory) => ({
-                name: subcategory.name,
-                items: subcategory.items,
-            })),
+            parentCategory: tableData[0].type,
+            subcategories: tableData.flatMap((category) =>
+                category.value.map((subcategory) => ({
+                    name: subcategory.name,
+                    items: subcategory.items,
+                }))
+            ),
         };
 
         return categoryValues;
         // Send categoryValues to the backend API here
+
+
+
+
+        // if (tableData.length === 0) {
+        //     return null; // or handle the case where there is no data
+        // }
+
+        // const firstCategory = tableData;
+
+        // const categoryValues = {
+        //     name: firstCategory.type,
+        //     subcategories: firstCategory.forEach((elem) => {
+        //         elem.value.map((subcategory) => ({
+        //             name: subcategory.name,
+        //             items: subcategory.items,
+        //         }))
+        //     })
+        //     // subcategories: firstCategory.value.map((subcategory) => ({
+        //     //     name: subcategory.name,
+        //     //     items: subcategory.items,
+        //     // })),
+        // };
+
+        // return categoryValues;
+        // Send categoryValues to the backend API here
     };
+
+
+    const getParentCatgData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetParentCategoryData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setParentCatgData(response.parentCategory);
+                console.log(response)
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message)
+        }
+    }
+
+
+    useEffect(() => {
+        getParentCatgData();
+    }, []);
 
 
     return (
@@ -267,18 +334,26 @@ const Categories = () => {
                                 <div className='grid grid-cols-2 gap-4'>
                                     <div>
 
-                                        <Input
-                                            size={'sm'}
+
+                                        <Select
+                                            items={parentCatgData}
+                                            variant="flat"
+                                            placeholder="Parent Category"
+                                            labelPlacement="inside"
+                                            name='parentCategory'
                                             classNames={{
-                                                label: "font-bold font-3",
-                                                input: "font-semibold font",
+                                                base: "w-full font-semibold font-black",
+                                                trigger: "min-h-unit-12 py-2 font-sans",
                                             }}
-                                            className=''
-                                            type="text"
-                                            label="Main Category Name (eg. Mens)"
-                                            onChange={(e) => setCategoryName(e.target.value)}
-                                            value={categoryName}
-                                        />
+
+                                            onChange={(e) => setSelectedParentCategory(e.target.value)}
+                                        >
+                                            {(parent) => (
+                                                <SelectItem key={parent._id} textValue={parent.name}>
+                                                    <span className="font-sans font-semibold">{parent.name}</span>
+                                                </SelectItem>
+                                            )}
+                                        </Select>
 
                                         <div className="mb-4  border-black mt-6">
                                             <label className="font-bold font-3 mt-4">Subcategories</label>

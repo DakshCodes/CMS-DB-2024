@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
 import Attributes from './pages/Attributes/Attributes';
 import Tags from './pages/Tags/Tags';
 import ItemHighlight from './pages/ProductHighlight/ItemHighlight';
+import ParentCategory from './pages/ParentCategory/ParentCategory';
 
 const routesConfig = [
   // { path: '/login', element: <LoginPage /> },
@@ -37,6 +38,10 @@ const routesConfig = [
   {
     path: '/categories',
     element: <Categories />,
+  },
+  {
+    path: '/parentCategory',
+    element: <ParentCategory />,
   },
   {
     path: '/sizes',
