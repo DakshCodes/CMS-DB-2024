@@ -115,14 +115,14 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                 return (
                     <div className="relative  w-[max-content] flex justify-start items-center gap-2">
                         <Dropdown className="bg-background border-1 border-default-200">
-                            <DropdownTrigger>
+                            <DropdownTrigger aria-label="Dropdown menu">
                                 <Button isIconOnly radius="full" size="sm" variant="light">
                                     <VerticalDotsIcon className="text-[#000]" />
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu className='font-2 font-medium text-[#000]'>
-                                <DropdownItem onClick={() => update(user._id)}>Edit</DropdownItem>
-                                <DropdownItem onClick={() => deleteitem(user._id)}>Delete</DropdownItem>
+                                <DropdownItem aria-label="Edit" onClick={() => update(user._id)}>Edit</DropdownItem>
+                                <DropdownItem aria-label="Delete" onClick={() => deleteitem(user._id)}>Delete</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
