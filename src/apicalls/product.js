@@ -2,7 +2,7 @@ import axios from "axios"
 
 export const CreateProduct = async (payload) => {
     try {
-        const response = await axios.post("http://localhost:5000/api/product/create-product", payload);
+        const response = await axios.post(`${import.meta.env.VITE_SERVER}/api/product/create-product`, payload);
         
         return response.data;
 
@@ -13,7 +13,7 @@ export const CreateProduct = async (payload) => {
 
 export const GetProductsData = async () => {
     try {
-        const response = await axios.get("http://localhost:5000/api/product/get-all-products");
+        const response = await axios.get(`${import.meta.env.VITE_SERVER}/api/product/get-all-products`);
         return response.data;
 
     } catch (error) {
@@ -23,7 +23,7 @@ export const GetProductsData = async () => {
 
 export const GetProductDataByID = async (id) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/product/get-product-by-id/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_SERVER}/api/product/get-product-by-id/${id}`);
         return response.data;
 
     } catch (error) {
@@ -33,7 +33,7 @@ export const GetProductDataByID = async (id) => {
 
 export const DeleteProduct = async (id) => {
     try {
-        const response = await axios.delete(`http://localhost:5000/api/product/delete-product/${id}`);
+        const response = await axios.delete(`${import.meta.env.VITE_SERVER}/api/product/delete-product/${id}`);
         return response.data;
 
     } catch (error) {
@@ -43,7 +43,7 @@ export const DeleteProduct = async (id) => {
 
 export const EditProductById = async (payload , id) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/product/update-product/${id}`,payload);
+        const response = await axios.put(`${import.meta.env.VITE_SERVER}/api/product/update-product/${id}`,payload);
         return response.data;
 
     } catch (error) {

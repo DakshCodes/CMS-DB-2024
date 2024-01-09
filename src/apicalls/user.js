@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 
 export const loginUser = async (payload) => {
   try {
-    const response = await axios.post("http://localhost:5000/api/login", payload);
+    const response = await axios.post(`${import.meta.env.VITE_SERVER}/api/login`, payload);
     return response.data;
     const id = response.data.user._id
   } catch (error) {
@@ -21,8 +21,8 @@ export const GetCurrentUser = async () => {
       // Handle the case where the token is not available
       throw new Error("Token not available");
     }
-
-    const response = await axios.get("http://localhost:5000/api/get-current-user", {
+      //  console.log(import.meta.env.VITE_SERVER)
+    const response = await axios.get(`${import.meta.env.VITE_SERVER}/api/get-current-user`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -39,7 +39,7 @@ export const GetCurrentUser = async () => {
 
 export const UploadImage = async(payload) =>{
   try {
-      const response = await axios.post(`http://localhost:5000/api/product/upload`,payload);
+      const response = await axios.post(`${import.meta.env.VITE_SERVER}/api/product/upload`,payload);
       return response.data;
       
   } catch (error) {
@@ -48,7 +48,7 @@ export const UploadImage = async(payload) =>{
 }
 export const UploadProfileImage = async(payload) =>{
   try {
-      const response = await axios.post(`http://localhost:5000/api/uploadprofileimage`,payload);
+      const response = await axios.post(`${import.meta.env.VITE_SERVER}/api/uploadprofileimage`,payload);
       return response.data;
       
   } catch (error) {
@@ -58,7 +58,7 @@ export const UploadProfileImage = async(payload) =>{
 
 export const updateUser = async (payload,id) => {
   try {
-    const response = await axios.put(`http://localhost:5000/api/updateuser/${id}`,
+    const response = await axios.put(`${import.meta.env.VITE_SERVER}/api/updateuser/${id}`,
    payload);
     return response.data;
     
