@@ -90,7 +90,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user?.name || user?.parentCategory}
+                        {user?.parentCategory}
                     </p>
                 );
             case "options":

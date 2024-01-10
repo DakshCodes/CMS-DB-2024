@@ -38,7 +38,7 @@ const ParentCategory = () => {
 
     useEffect(() => {
         getParentCatgData();
-    }, [setParentCatgData]);
+    }, []);
 
     const isAttributeNameUnique = (name) => {
         const lowerCaseName = name.toLowerCase();

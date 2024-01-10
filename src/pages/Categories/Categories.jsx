@@ -145,13 +145,20 @@ const Categories = () => {
                 // Open the modal for updating
                 onOpen();
 
-                setTableData([{
+                const newTableData = existingCategory.subcategories.map((subcategory) => ({
                     type: existingCategory.parentCategory,
-                    value: existingCategory.subcategories.map((subcategory) => ({
-                        name: subcategory.name,
-                        items: subcategory.items,
-                    })),
-                }]);
+                    value: [
+                        {
+                            name: subcategory.name,
+                            items: subcategory.items,
+                        },
+                    ],
+                }));
+
+                // Update the state
+                setTableData(newTableData);
+                setTableData(updatedTableData);
+                setSelectedParentCategory(existingCategory.parentCategory)
 
                 // console.log("table data =>  ", tableData)
 
@@ -217,24 +224,31 @@ const Categories = () => {
         ));
 
         console.log(prepareCategoryValues())
-        try {
-            dispatch(SetLoader(true));
-            const response = await CreateCategory(prepareCategoryValues());
-            dispatch(SetLoader(false));
-            if (response.success) {
-                toast.success(response.message)
-                setCategoryData(prevData => [...prevData, { _id: response.categoryDoc._id, name: response.categoryDoc.name, createdAt: response.categoryDoc.createdAt, actions: "" }]);
-                navigate("/categories")
-            }
-            else {
-                throw new Error(response.message);
+
+        setTimeout(async () => {
+
+
+            try {
+                dispatch(SetLoader(true));
+                const response = await CreateCategory(prepareCategoryValues());
+                dispatch(SetLoader(false));
+                if (response.success) {
+                    toast.success(response.message)
+                    setCategoryData(prevData => [...prevData, { _id: response.categoryDoc._id, name: response.categoryDoc.name, createdAt: response.categoryDoc.createdAt, actions: "" }]);
+                    navigate("/categories")
+                }
+                else {
+                    throw new Error(response.message);
+                }
+
+            } catch (error) {
+                dispatch(SetLoader(false));
+                console.log(error.message)
+                toast.error(error.message)
             }
 
-        } catch (error) {
-            dispatch(SetLoader(false));
-            console.log(error.message)
-            toast.error(error.message)
-        }
+        }, [])
+
     };
     const prepareCategoryValues = () => {
 
@@ -341,6 +355,7 @@ const Categories = () => {
                                             placeholder="Parent Category"
                                             labelPlacement="inside"
                                             name='parentCategory'
+                                            value={selectedParentCategory}
                                             classNames={{
                                                 base: "w-full font-semibold font-black",
                                                 trigger: "min-h-unit-12 py-2 font-sans",
@@ -349,7 +364,7 @@ const Categories = () => {
                                             onChange={(e) => setSelectedParentCategory(e.target.value)}
                                         >
                                             {(parent) => (
-                                                <SelectItem key={parent._id} textValue={parent.name}>
+                                                <SelectItem key={parent._id} textValue={parent._id}>
                                                     <span className="font-sans font-semibold">{parent.name}</span>
                                                 </SelectItem>
                                             )}
