@@ -90,8 +90,8 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        { user?.subcategories.map((elem,index)=>{
-                            return(
+                        {user?.subcategories.map((elem, index) => {
+                            return (
                                 <div className='flex gap-1'>
                                     <div>{index + 1}. </div>
                                     {elem.name},
@@ -105,7 +105,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        { user?.parentCategory.name}
+                        {user?.parentCategory?.name || "No Parent Category"}
                     </p>
                 );
             case "options":
@@ -120,16 +120,16 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         }
                     </p>
                 );
-            case "date":
+            case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
                         {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
                     </div>
                 );
-            case "createdAt":
+            case "updatedAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
-                        {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
+                        {moment(user?.updatedAt).format("YYYY[/]MM[/]DD [at] LT")}
                     </div>
                 );
             case "actions":
