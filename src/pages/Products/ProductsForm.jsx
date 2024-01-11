@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Heading from '../../components/ui/Heading';
 import {
     Input,
@@ -43,6 +43,9 @@ const ProductsForm = () => {
     const [selectedValues, setSelectedValues] = useState(new Set([]));
     const [selectedAttribute, setSelectedAttribute] = useState(null);
     const [stockValue, setStockValue] = useState('');
+    const [Image, setImages] = useState('');
+    const [ImageCombo, setImageCombo] = useState([]);
+    const [ImgColor, setImgColor] = useState("");
     // State for selected tag
     const [selectedhighlight, setselectedhighlight] = useState(new Set([]));
     const [categoriesData, setCategoriesData] = useState([]);
@@ -92,7 +95,6 @@ const ProductsForm = () => {
 
                 if (response.success) {
                     const productDetails = response.data;
-                    console.log(productDetails, "details");
 
                     // Update the product details and handle additional data as needed
                     const updatedProductDetails = {
@@ -191,7 +193,6 @@ const ProductsForm = () => {
             dispatch(SetLoader(false));
             if (response.success) {
                 setCategoriesData(response.category);
-                console.log("-----------------------", response.category)
             } else {
                 throw new Error(response.message);
             }
@@ -218,9 +219,11 @@ const ProductsForm = () => {
 
         formValues.tags = Array.from(selectedtags);
         formValues.attributes = mainstockTable;
-        formValues.product_images = imageLinks;
+        formValues.product_images = ImageCombo;
 
-        console.log(formValues)
+
+        console.log(formValues);
+
 
 
         // Validate fields
@@ -255,26 +258,41 @@ const ProductsForm = () => {
     };
 
     const handleImageChange = (e) => {
-        const name = e.target.name;
         const value = e.target.files[0];
-        setFormValues({
-            ...formValues,
-            [name]: value,
-        });
+        setImages(value);
+
     };
 
     const uploadImage = async (e) => {
         e.preventDefault();
         try {
+
+            // Check Color empty
+            if (!ImgColor) {
+                toast.error('Please Add Color');
+                return false;
+            }
+
+            // Check Imgae Src empty
+            if (!Image) {
+                toast.error('Please Add Image ?');
+                return false;
+            }
+
             dispatch(SetLoader(true));
             const formData = new FormData();
-            formData.append('product_images', formValues.product_images);
+            formData.append('product_images', Image);
             const response = await UploadImage(formData);
             dispatch(SetLoader(false));
 
             if (response.success) {
                 const newImageLink = response.url;
-                setImageLinks((prevLinks) => [...prevLinks, newImageLink]);
+                setImageCombo([...ImageCombo, {
+                    color: ImgColor,
+                    src: newImageLink
+                }]);
+                setImages("")
+                setImgColor("")
                 toast.success(response.message);
             } else {
                 console.log(response.message);
@@ -318,6 +336,10 @@ const ProductsForm = () => {
         const selectedAttributeOne = attributeData.find((attribute) => attribute.name === selectedAttributeName);
         setvaluedata(selectedAttributeOne);
         setSelectedAttribute(selectedAttributeOne);
+    };
+    const changeColor = (e) => {
+        const selectColor = e.target.value;
+        setImgColor(selectColor);
     };
 
 
@@ -466,27 +488,22 @@ const ProductsForm = () => {
             return false;
         }
 
-        // Check if Sale Price is empty
-        if (!main_category) {
-            toast.error('Please fill in the main_category');
-            return false;
-        }
-        // Check if sub_category is empty
-        if (!sub_category) {
-            toast.error('Please fill in the sub_category');
-            return false;
-        }
-        // Check if sub_category is empty
-        if (!sub_sub_category) {
-            toast.error('Please fill in the sub_sub_category');
-            return false;
-        }
+        // // Check if Sale Price is empty
+        // if (!main_category) {
+        //     toast.error('Please fill in the main_category');
+        //     return false;
+        // }
+        // // Check if sub_category is empty
+        // if (!sub_category) {
+        //     toast.error('Please fill in the sub_category');
+        //     return false;
+        // }
+        // // Check if sub_category is empty
+        // if (!sub_sub_category) {
+        //     toast.error('Please fill in the sub_sub_category');
+        //     return false;
+        // }
         // Check if product_images is empty
-        if (!product_images) {
-            toast.error('Please fill in the product_images');
-            return false;
-        }
-        // Check if sub_category is empty
         if (!product_images) {
             toast.error('Please fill in the product_images');
             return false;
@@ -516,6 +533,15 @@ const ProductsForm = () => {
         return true;
     };
 
+
+    const fileInputRef = useRef(null);
+
+    const handleSelectPhoto = () => {
+        fileInputRef.current.click();
+    };
+
+
+    console.log(ImageCombo, "images");
 
 
     return (
@@ -840,17 +866,53 @@ const ProductsForm = () => {
                                 </Card>
                             </Tab>
                             <Tab key="image" title="Images">
-                                <Card className='p-4'>
+                                <Card className='p-4 flex-row gap-5'>
+                                    <Select
+                                        placeholder="Select Color"
+                                        labelPlacement="outside"
+                                        variant='flat'
+                                        classNames={{
+                                            base: "max-w-[12rem] font-sans font-black",
+                                            value: "font-sans font-[600]"
+                                        }}
+                                        onChange={(e) => changeColor(e)}
+                                        defaultSelectedKeys={ImgColor}
+                                    >
+                                        {attributeData.map((animal) => (
+                                            <SelectItem key={animal.name} value={animal.name}>
+                                                {animal.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                    <Button color="primary"
+                                        className='font-sans  font-[600]'
+                                        endContent={<svg
+                                            width={24}
+                                            height={24}
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                clipRule="evenodd"
+                                                d="M17.44 6.236c.04.07.11.12.2.12 2.4 0 4.36 1.958 4.36 4.355v5.934A4.368 4.368 0 0117.64 21H6.36A4.361 4.361 0 012 16.645V10.71a4.361 4.361 0 014.36-4.355c.08 0 .16-.04.19-.12l.06-.12.106-.222a97.79 97.79 0 01.714-1.486C7.89 3.51 8.67 3.01 9.64 3h4.71c.97.01 1.76.51 2.22 1.408.157.315.397.822.629 1.31l.141.299.1.22zm-.73 3.836c0 .5.4.9.9.9s.91-.4.91-.9-.41-.909-.91-.909-.9.41-.9.91zm-6.44 1.548c.47-.47 1.08-.719 1.73-.719.65 0 1.26.25 1.72.71.46.459.71 1.068.71 1.717A2.438 2.438 0 0112 15.756c-.65 0-1.26-.25-1.72-.71a2.408 2.408 0 01-.71-1.717v-.01c-.01-.63.24-1.24.7-1.699zm4.5 4.485a3.91 3.91 0 01-2.77 1.15 3.921 3.921 0 01-3.93-3.926 3.865 3.865 0 011.14-2.767A3.921 3.921 0 0112 9.402c1.05 0 2.04.41 2.78 1.15.74.749 1.15 1.738 1.15 2.777a3.958 3.958 0 01-1.16 2.776z"
+                                                fill={"#fff"}
+                                            />
+                                        </svg>}
+                                        onClick={handleSelectPhoto}
+                                    >
+                                        {!Image?.name > 0 ? "Select Image" : Image.type}
+                                    </Button>
                                     <input
+                                        ref={fileInputRef}
                                         type="file"
                                         id="product_images"
                                         onChange={handleImageChange}
                                         placeholder='Product Image'
-                                        className='text-center px-4 rounded-lg border-black h-full'
+                                        className='text-center px-4 rounded-lg border-black h-full hidden'
                                         name="product_images"
                                     />
-
-
                                     <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" onClick={uploadImage}>
                                         Upload
                                     </Button>
@@ -858,10 +920,11 @@ const ProductsForm = () => {
                                 </Card>
                                 <Card className={"p-4 mt-4 max-h-[50rem] overflow-scroll"}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-12 p-4 ">
-                                        {imageLinks && imageLinks.length > 0 ? (
-                                            imageLinks.map((unitImage, index) => (
-                                                <div key={index} className='w-[100%] border border-black rounded-xl h-[100%] col-span-1'>
-                                                    <img className='w-full h-full object-cover rounded-xl' src={unitImage} alt="" />
+                                        {ImageCombo && ImageCombo.length > 0 ? (
+                                            ImageCombo.map((unitImage, index) => (
+                                                <div key={index} className='w-[100%]  h-[100%] col-span-1'>
+                                                    <h1 className='font-sans mx-5 font-bold'>{unitImage.color}</h1>
+                                                    <img className='w-full h-full object-cover rounded-xl' src={unitImage.src} alt="" />
                                                 </div>
                                             ))
                                         ) : (
