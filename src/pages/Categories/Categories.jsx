@@ -21,11 +21,7 @@ const Categories = () => {
     const [subcategories, setSubcategories] = useState([{ name: "", items: [""] }]);
     const [tableData, setTableData] = useState([]);
     const [parentCatgData, setParentCatgData] = useState([]);
-    const [selectedParentCategoryID, setSelectedParentCategoryID] = useState('');
-
-
-
-
+    const [selectedParentCategoryID, setSelectedParentCategoryID] = useState(null);
 
     const getCategoryData = async () => {
         try {
@@ -56,6 +52,7 @@ const Categories = () => {
         { name: "Parent Category", uid: "parentCategory", },
         { name: "SubCategories", uid: "subcategories", },
         { name: "Created At", uid: "createdAt" },
+        { name: "Updated At", uid: "updatedAt" },
         { name: "ACTIONS", uid: "actions" },
     ];
 
@@ -147,7 +144,7 @@ const Categories = () => {
                 onOpen();
 
                 const newTableData = existingCategory.subcategories.map((subcategory) => ({
-                    type: existingCategory.parentCategory._id,
+                    type: existingCategory.parentCategory?._id || null,
                     value: [
                         {
                             name: subcategory.name,
@@ -158,7 +155,7 @@ const Categories = () => {
 
                 // Update the state
                 setTableData(newTableData);
-                setSelectedParentCategoryID(existingCategory.parentCategory.name)
+                setSelectedParentCategoryID(existingCategory.parentCategory?.name || null)
 
                 // console.log("table data =>  ", tableData)
 
@@ -173,7 +170,7 @@ const Categories = () => {
     };
 
     console.log("Table -> ", tableData)
-    console.log("Parent Category -> ", selectedParentCategoryID) 
+    console.log("Parent Category -> ", selectedParentCategoryID)
 
 
 
@@ -202,6 +199,7 @@ const Categories = () => {
                 );
 
                 // Close the modal
+                navigate("/categories")
                 onOpenChange(false);
             } else {
                 throw new Error(response.message);
@@ -396,7 +394,7 @@ const Categories = () => {
                                                         <div className="ml-4 mt-6">
                                                             <label className="font-bold font-3 mt-6">Items</label>
                                                             {subcategory.items.map((item, itemIndex) => (
-                                                                <div className='flex gap-2 border mt-4'>
+                                                                <div className='flex gap-2 mt-4'>
 
                                                                     <Input
                                                                         key={itemIndex}
@@ -484,7 +482,19 @@ const Categories = () => {
                                                 {tableData.map((data, index) => (
 
                                                     <TableRow key={index}>
-                                                        <TableCell>{data.type}</TableCell>
+                                                        <TableCell>
+                                                            {data.type ? (
+                                                                parentCatgData
+                                                                    .filter((item) => item._id === data.type)
+                                                                    .map((matchedItem) => {
+                                                                        console.log(matchedItem.name);
+                                                                        return matchedItem.name;
+                                                                    })[0] || "No Parent Category"
+                                                            ) : (
+                                                                "No Parent Category"
+                                                            )}
+                                                        </TableCell>
+
                                                         <TableCell>
                                                             {data.value.map((subcategory, subIndex) => (
                                                                 <div key={subIndex}>
