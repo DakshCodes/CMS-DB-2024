@@ -13,34 +13,35 @@ const PrivateRoute = ({ children }) => {
     const dispatch = useDispatch();
 
     const validateToken = async () => {
-
         try {
             dispatch(SetLoader(true));
             const response = await GetCurrentUser();
             dispatch(SetLoader(false));
-            // updateToken();
-
 
             if (response.success) {
-                dispatch(SetUser(response.data))
-            }
-            else {
+                dispatch(SetUser(response.data));
+            } else {
                 if (response.message === "jwt expired") {
-                    // Handle token expiration, e.g., redirect to login
+                    // Remove the token from localStorage
+                    localStorage.removeItem("token");
+                    // Redirect to login
                     navigate("/login");
                 } else {
                     // Handle other errors
+                    localStorage.removeItem("token");
                     navigate("/login");
-                    console.log(response.message)
+                    console.log(response.message);
                 }
             }
-
         } catch (error) {
             dispatch(SetLoader(false));
-            navigate("/login")
-            console.log(response.message)
+            // Remove the token from localStorage
+            localStorage.removeItem("token");
+            navigate("/login");
+            console.log(response.message);
         }
     }
+
 
     useEffect(() => {
         if (localStorage.getItem("token")) {
