@@ -21,7 +21,7 @@ const Categories = () => {
     const [subcategories, setSubcategories] = useState([{ name: "", items: [""] }]);
     const [tableData, setTableData] = useState([]);
     const [parentCatgData, setParentCatgData] = useState([]);
-    const [selectedParentCategory, setSelectedParentCategory] = useState('');
+    const [selectedParentCategoryID, setSelectedParentCategoryID] = useState('');
 
 
 
@@ -53,7 +53,8 @@ const Categories = () => {
 
     const columns = [
         // { name: "ID", uid: "_id", sortable: true },
-        { name: "NAME", uid: "name", },
+        { name: "Parent Category", uid: "parentCategory", },
+        { name: "SubCategories", uid: "subcategories", },
         { name: "Created At", uid: "createdAt" },
         { name: "ACTIONS", uid: "actions" },
     ];
@@ -110,7 +111,7 @@ const Categories = () => {
                 return updatedData;
             } else {
                 // Main category doesn't exist, add it to tableData
-                return [...prevData, { type: selectedParentCategory, value: newSubcategories }];
+                return [...prevData, { type: selectedParentCategoryID, value: newSubcategories }];
             }
         });
 
@@ -120,7 +121,7 @@ const Categories = () => {
         setSubcategories([{ name: "", items: [""] }]);
     };
 
-    console.log("---------------------->", selectedParentCategory)
+    console.log("---------------------->", selectedParentCategoryID)
 
 
 
@@ -146,7 +147,7 @@ const Categories = () => {
                 onOpen();
 
                 const newTableData = existingCategory.subcategories.map((subcategory) => ({
-                    type: existingCategory.parentCategory,
+                    type: existingCategory.parentCategory._id,
                     value: [
                         {
                             name: subcategory.name,
@@ -157,8 +158,7 @@ const Categories = () => {
 
                 // Update the state
                 setTableData(newTableData);
-                setTableData(updatedTableData);
-                setSelectedParentCategory(existingCategory.parentCategory)
+                setSelectedParentCategoryID(existingCategory.parentCategory.name)
 
                 // console.log("table data =>  ", tableData)
 
@@ -173,20 +173,20 @@ const Categories = () => {
     };
 
     console.log("Table -> ", tableData)
+    console.log("Parent Category -> ", selectedParentCategoryID) 
 
 
 
     // Handle update form submission
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
+        console.log(prepareCategoryValues());
 
         try {
             dispatch(SetLoader(true));
 
             // Call the update API with the updated data
-            const response = await UpdateCategory(updateCategoryId, {
-                name: CategoryName,
-            });
+            const response = await UpdateCategory(updateCategoryId, prepareCategoryValues());
 
             dispatch(SetLoader(false));
 
@@ -352,19 +352,19 @@ const Categories = () => {
                                         <Select
                                             items={parentCatgData}
                                             variant="flat"
-                                            placeholder="Parent Category"
+                                            placeholder={selectedParentCategoryID ? selectedParentCategoryID : "Parnet Category"}
                                             labelPlacement="inside"
                                             name='parentCategory'
-                                            value={selectedParentCategory}
+                                            value={selectedParentCategoryID}
                                             classNames={{
                                                 base: "w-full font-semibold font-black",
                                                 trigger: "min-h-unit-12 py-2 font-sans",
                                             }}
 
-                                            onChange={(e) => setSelectedParentCategory(e.target.value)}
+                                            onChange={(e) => setSelectedParentCategoryID(e.target.value)}
                                         >
                                             {(parent) => (
-                                                <SelectItem key={parent._id} textValue={parent._id}>
+                                                <SelectItem key={parent._id} textValue={parent.name}>
                                                     <span className="font-sans font-semibold">{parent.name}</span>
                                                 </SelectItem>
                                             )}

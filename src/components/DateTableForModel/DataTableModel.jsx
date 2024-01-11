@@ -85,12 +85,27 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         {user._id}
                     </p>
                 );
-            case "name":
+            case "subcategories":
                 return (
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user?.parentCategory}
+                        { user?.subcategories.map((elem,index)=>{
+                            return(
+                                <div className='flex gap-1'>
+                                    <div>{index + 1}. </div>
+                                    {elem.name},
+                                </div>
+                            )
+                        })}
+                    </p>
+                );
+            case "parentCategory":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        { user?.parentCategory.name}
                     </p>
                 );
             case "options":
