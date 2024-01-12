@@ -64,36 +64,60 @@ const AttributeForm = ({ setFormValues }) => {
 
     const addAttributeToTable = () => {
         if (selectedAttribute && selectedValues.length > 0) {
-            const newTableData = selectedValues.map((value) => ({
-                value1: value,
-                value2: "",
-                stock: "",
-                sku: ""
-            }));
 
-            // If there are existing items in the table, update value2 for the corresponding items
-            if (tableData.length > 0) {
+            const createOrUpdateObjects = (existingData, newValues) => {
 
-                if (selectedValues.length === 1) {
-                    const updatedTableData = tableData.map((item) => ({
-                        ...item,
-                        value2: selectedValues[0]
-                    }));
-                    setTableData(updatedTableData);
+                if (existingData.length > 0) {
+                    if (newValues.length === 1) {
+                        return existingData.map((existingItem, newValues) => {
+                            let count = 1;
+
+                            // Check if the object already has value1, value2, etc.
+                            while (existingItem["value" + count]) {
+                                count++;
+                            }
+                            // If the object doesn't have value1, value2, etc., add them
+                            if (!existingItem["value" + count]) {
+                                existingItem["value" + count] = selectedValues[0];
+                            }
+
+                            return existingItem;
+                        });
+                    }
                 }
-                else {
-                    const updatedTableData = tableData.map((item, index) => {
-                        if (index < selectedValues.length) {
-                            return {
-                                ...item,
-                                value2: selectedValues[index]
-                            };
+
+                return newValues.map((value, index) => {
+                    const newItem = { stock: "", sku: "" };
+                    let count = 1;
+
+                    // Check if there are existing items in the table
+                    if (existingData.length > 0) {
+                        const existingItem = existingData[index];
+                        if (existingItem) {
+                            while (existingItem["value" + count]) {
+                                count++;
+                            }
+                            if (!existingItem["value" + count]) {
+                                existingItem["value" + count] = value;
+                            }
+
+                            return existingItem;
                         }
-                        return item;
-                    });
-                    setTableData(updatedTableData);
-                }
+                    }
+
+                    newItem[`value1`] = value;
+                    return newItem;
+                });
+            };
+
+            // If there are existing items in the table, update the corresponding properties
+            if (tableData.length > 0) {
+                const updatedTableData = createOrUpdateObjects(tableData, selectedValues);
+                console.log(updatedTableData);
+                setTableData(updatedTableData);
             } else {
+                // If it's the first time, create new objects with dynamic properties
+                const newTableData = createOrUpdateObjects([], selectedValues);
                 setTableData(newTableData);
             }
 
@@ -112,20 +136,32 @@ const AttributeForm = ({ setFormValues }) => {
         setTableData([...tableData, { stock: stockValue }]);
         setStockValue('');
     };
+
     const addStockMain = () => {
         if (tableData.length > 0) {
             // Save the previous value of mainstockTable
             const previousMainstockTable = [...mainstockTable];
 
-            // Append the current value of tableData to mainstockTable
-            setMainstockTable([...mainstockTable, ...tableData]);
+            // Modify the structure of each item in tableData to fit the new schema
+            const formattedTableData = tableData.map((item) => ({
+                sku: item.sku, // Assuming sku is a fixed property for each item
+                stock: item.stock, // Assuming stock is a fixed property for each item
+                values: Object.keys(item)
+                    .filter(key => key.startsWith('value'))
+                    .map(key => ({
+                        value: item[key]
+                    })),
+            }));
+
+            // Append the current value of formattedTableData to mainstockTable
+            setMainstockTable([...mainstockTable, ...formattedTableData]);
 
             // Now you can use previousMainstockTable if needed
             // For example, console.log(previousMainstockTable);
 
             setFormValues((prevValues) => ({
                 ...prevValues,
-                attributes: [...mainstockTable, ...tableData],
+                attributes: [...mainstockTable, ...formattedTableData],
             }));
             setTableData([]);
         }
@@ -153,8 +189,8 @@ const AttributeForm = ({ setFormValues }) => {
         setTableData(updatedTableData);
     };
 
-    // console.log(tableData)
     console.log(mainstockTable, "main")
+    // console.log(selectedValues, "values")
 
     return (
         <>
@@ -336,7 +372,7 @@ const AttributeForm = ({ setFormValues }) => {
                             {mainstockTable.map((object, index) => (
                                 <TableRow key={index}>
                                     {/* Display VALUES and STOCKS in each row */}
-                                    <TableCell>{object.value1 + "+" + object.value2}</TableCell>
+                                    <TableCell>{object.values.map(item => item.value).join(' + ')}</TableCell>
                                     <TableCell>{object.stock}</TableCell>
                                     <TableCell>{object.sku}</TableCell>
                                     <TableCell className='flex gap-4'>

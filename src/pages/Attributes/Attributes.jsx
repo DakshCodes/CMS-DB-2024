@@ -185,7 +185,6 @@ const Attributes = () => {
         }
     };
 
-    console.log(attributeData,"data")
     return (
         <>
             {/* attribute add & update model */}
