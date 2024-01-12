@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Select, SelectItem, } from "@nextui-org/react";
+import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Select, SelectItem, Textarea, Switch, Tooltip, image, } from "@nextui-org/react";
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import { CreateCategory, DeleteCategory, GetCategoryData, UpdateCategory } from '../../apicalls/category';
+import { UploadImage } from '../../apicalls/user';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { SetLoader } from "../../redux/loadersSlice";
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
 import { GetParentCategoryData } from '../../apicalls/parentCategory';
+import axios from 'axios';
 
 const Categories = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -17,11 +19,15 @@ const Categories = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [categoryData, setCategoryData] = useState([])
-    const [categoryName, setCategoryName] = useState(""); // State to hold main category name
-    const [subcategories, setSubcategories] = useState([{ name: "", items: [""] }]);
     const [tableData, setTableData] = useState([]);
-    const [parentCatgData, setParentCatgData] = useState([]);
     const [selectedParentCategoryID, setSelectedParentCategoryID] = useState(null);
+    const [mainImage, setMainImage] = useState(null);
+    const [hoverImage, setHoverImage] = useState(null);
+    const [hoverImageLink, setHoverImageLink] = useState(null);
+    const [mainImageLink, setMainImageLink] = useState(null);
+    const [categoryDescription, setCategoryDescription] = useState("");
+    const [visibility, setVisibility] = useState(true);
+
 
     const getCategoryData = async () => {
         try {
@@ -43,14 +49,16 @@ const Categories = () => {
 
     useEffect(() => {
         getCategoryData();
-    }, [setCategoryData]);
+    }, [setCategoryData, updateCategoryId]);
 
     // console.log(categoryData.filter((item) => item._id === "65891a4c00533dad0822f172")[0].name);
 
     const columns = [
         // { name: "ID", uid: "_id", sortable: true },
+        { name: "Hover Image", uid: "hoverImage", },
         { name: "Parent Category", uid: "parentCategory", },
-        { name: "SubCategories", uid: "subcategories", },
+        { name: "Name", uid: "name", },
+        { name: "Visibility", uid: "isVisible", },
         { name: "Created At", uid: "createdAt" },
         { name: "Updated At", uid: "updatedAt" },
         { name: "ACTIONS", uid: "actions" },
@@ -60,6 +68,10 @@ const Categories = () => {
     const handleCloseModal = () => {
         SetCategoryName("");
         setUpdateCategoryId(null);
+        setCategoryDescription("")
+        setHoverImageLink(null);
+        setMainImageLink(null);
+        setVisibility(true);
     };
 
     // Update category function
@@ -83,51 +95,56 @@ const Categories = () => {
         }
     };
 
-    const handleDeleteItem = (subIndex, itemIndex) => {
-        const updatedSubcategories = [...subcategories];
-        updatedSubcategories[subIndex].items.splice(itemIndex, 1);
-        setSubcategories(updatedSubcategories);
-    };
 
-    const handleAddToTable = () => {
-        const newSubcategories = subcategories.map((subcategory) => ({
-            name: subcategory.name,
-            items: subcategory.items,
-        }));
-
-        setTableData((prevData) => {
-            const existingDataIndex = prevData.findIndex((data) => data.type === categoryName);
-
-            if (existingDataIndex !== -1) {
-                // Main category already exists, update its subcategories
-                const updatedData = [...prevData];
-                updatedData[existingDataIndex].value = [
-                    ...updatedData[existingDataIndex].value,
-                    ...newSubcategories,
-                ];
-                return updatedData;
-            } else {
-                // Main category doesn't exist, add it to tableData
-                return [...prevData, { type: selectedParentCategoryID, value: newSubcategories }];
-            }
-        });
-
-
-        // Reset the input fields after adding to the table
-        SetCategoryName("");
-        setSubcategories([{ name: "", items: [""] }]);
-    };
 
     console.log("---------------------->", selectedParentCategoryID)
 
-
-
-    const removeAttributeFromTable = (index) => {
-        const newTableData = [...tableData];
-        newTableData.splice(index, 1);
-        setTableData(newTableData);
-
+    const handleMainImageChange = (e) => {
+        setMainImage(e.target.files[0]);
     };
+
+    const handleHoverImageChange = (e) => {
+        setHoverImage(e.target.files[0]);
+    };
+
+
+    const uploadImage = async (e, imageType) => {
+        e.preventDefault();
+        try {
+            dispatch(SetLoader(true));
+            const formData = new FormData();
+            const imageFile = imageType === 'main' ? mainImage : hoverImage;
+
+            if (imageFile) {
+                formData.append("product_images", imageFile);
+                dispatch(SetLoader(true));
+                const response = await UploadImage(formData);
+                dispatch(SetLoader(false));
+
+                if (response.success) {
+                    toast.success(response.message);
+                    const newImageLink = response.url;
+                    if (imageType === 'main') {
+                        setMainImageLink(newImageLink);
+                    } else {
+                        setHoverImageLink(newImageLink);
+                    }
+                } else {
+
+                    console.log(response.message);
+                }
+            } else {
+                dispatch(SetLoader(false));
+                // Handle the case where the image file is not selected
+                toast.error('Please select an image file.');
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message);
+            console.log(error.message);
+        }
+    };
+
 
     // Update category function
     const handleUpdate = async (categoryId) => {
@@ -139,27 +156,17 @@ const Categories = () => {
                     throw new Error("Category not found");
                 }
 
+
                 console.log("______________________", existingCategory)
                 // Open the modal for updating
+
                 onOpen();
-
-                const newTableData = existingCategory.subcategories.map((subcategory) => ({
-                    type: existingCategory.parentCategory?._id || null,
-                    value: [
-                        {
-                            name: subcategory.name,
-                            items: subcategory.items,
-                        },
-                    ],
-                }));
-
-                // Update the state
-                setTableData(newTableData);
-                setSelectedParentCategoryID(existingCategory.parentCategory?.name || null)
-
-                // console.log("table data =>  ", tableData)
-
-                // Save the category ID for the update function
+                setCategoryDescription(existingCategory.description);
+                setHoverImageLink(existingCategory.hoverImage);
+                setMainImageLink(existingCategory.mainImage);
+                setVisibility(existingCategory.isVisible);
+                SetCategoryName(existingCategory.name)
+                setSelectedParentCategoryID(existingCategory?.parentCategory?._id || null)
                 setUpdateCategoryId(categoryId);
             } else {
                 throw new Error(response.message);
@@ -179,13 +186,23 @@ const Categories = () => {
         e.preventDefault();
         console.log(prepareCategoryValues());
 
+
+        const values = prepareCategoryValues();
+
+        // Set parentCategory to null if it's an empty string
+        if (values.parentCategory === '') {
+            values.parentCategory = null;
+        }
+
         try {
             dispatch(SetLoader(true));
 
             // Call the update API with the updated data
-            const response = await UpdateCategory(updateCategoryId, prepareCategoryValues());
+            const response = await UpdateCategory(updateCategoryId, values);
 
             dispatch(SetLoader(false));
+
+            console.log(response);
 
             if (response.success) {
                 toast.success(response.message);
@@ -214,108 +231,67 @@ const Categories = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Use the 'formValues' object as needed, for example, send it to an API or perform other actions
-        console.log("Table data ", tableData);
-        console.log("Table data inside 1 level ", tableData.map(item => item.value));
-        console.log("Table data inside the value", tableData.map(item =>
-            item.value.forEach(elem => console.log(elem))
-        ));
-
         console.log(prepareCategoryValues())
 
-        setTimeout(async () => {
 
-
-            try {
-                dispatch(SetLoader(true));
-                const response = await CreateCategory(prepareCategoryValues());
-                dispatch(SetLoader(false));
-                if (response.success) {
-                    toast.success(response.message)
-                    setCategoryData(prevData => [...prevData, { _id: response.categoryDoc._id, name: response.categoryDoc.name, createdAt: response.categoryDoc.createdAt, actions: "" }]);
-                    navigate("/categories")
-                }
-                else {
-                    throw new Error(response.message);
-                }
-
-            } catch (error) {
-                dispatch(SetLoader(false));
-                console.log(error.message)
-                toast.error(error.message)
+        try {
+            dispatch(SetLoader(true));
+            const response = await CreateCategory(prepareCategoryValues());
+            dispatch(SetLoader(false));
+            if (response.success) {
+                await getCategoryData();
+                toast.success(response.message)
+                // setCategoryData(prevData => [...prevData, { _id: response.categoryDoc._id, name: response.categoryDoc.name, hoverImage: response.categoryDoc.hoverImage, isVisible: response.categoryDoc.isVisible, createdAt: response.categoryDoc.createdAt, actions: "" }]);
+                navigate("/categories")
+            }
+            else {
+                throw new Error(response.message);
             }
 
-        }, [])
-
-    };
-    const prepareCategoryValues = () => {
-
-        if (tableData.length === 0) {
-            return null; // or handle the case where there is no data
+        } catch (error) {
+            dispatch(SetLoader(false));
+            console.log(error)
+            toast.error(error)
         }
 
+
+    };
+
+    const updatedCategory = categoryData.filter((item) => item._id !== updateCategoryId)
+
+
+    // const [nameInfo, setNameInfo] = useState('');
+    // let timeout;
+    // const debounceCategoryName = () => {
+    //     clearInterval(timeout);
+    //     timeout = setTimeout(function () {
+    //         handleCategoryName();
+    //     }, 100);
+    // }
+
+    // const handleCategoryName = async (e) => {
+    //     SetCategoryName(e.target.value);
+    //     const res = await axios.post(`${process.env.VITE_SERVER_URL}/api/category/check-category-name?name=${e.target.value}`)
+    //     const data = res.message;
+    //     setNameInfo(data);
+    // }
+
+
+    const prepareCategoryValues = () => {
+
         const categoryValues = {
-            parentCategory: tableData[0].type,
-            subcategories: tableData.flatMap((category) =>
-                category.value.map((subcategory) => ({
-                    name: subcategory.name,
-                    items: subcategory.items,
-                }))
-            ),
+            name: CategoryName, // Add the name property
+            description: categoryDescription, // Add the description property
+            parentCategory: selectedParentCategoryID === 'null' ? null : selectedParentCategoryID, // Use the selectedParentCategoryID
+            isVisible: visibility, // You may adjust this based on your requirements
+            mainImage: mainImageLink, // Use the mainImageLink
+            hoverImage: hoverImageLink, // Use the hoverImageLink
         };
 
         return categoryValues;
-        // Send categoryValues to the backend API here
-
-
-
-
-        // if (tableData.length === 0) {
-        //     return null; // or handle the case where there is no data
-        // }
-
-        // const firstCategory = tableData;
-
-        // const categoryValues = {
-        //     name: firstCategory.type,
-        //     subcategories: firstCategory.forEach((elem) => {
-        //         elem.value.map((subcategory) => ({
-        //             name: subcategory.name,
-        //             items: subcategory.items,
-        //         }))
-        //     })
-        //     // subcategories: firstCategory.value.map((subcategory) => ({
-        //     //     name: subcategory.name,
-        //     //     items: subcategory.items,
-        //     // })),
-        // };
-
-        // return categoryValues;
-        // Send categoryValues to the backend API here
     };
 
 
-    const getParentCatgData = async () => {
-        try {
-            dispatch(SetLoader(true));
-            const response = await GetParentCategoryData();
-            dispatch(SetLoader(false));
-            if (response.success) {
-                setParentCatgData(response.parentCategory);
-                console.log(response)
-            } else {
-                throw new Error(response.message);
-            }
-        } catch (error) {
-            dispatch(SetLoader(false));
-            toast.error(error.message)
-        }
-    }
-
-
-    useEffect(() => {
-        getParentCatgData();
-    }, []);
 
 
     return (
@@ -327,7 +303,7 @@ const Categories = () => {
                 backdrop='opaque'
                 scrollBehavior='inside'
                 placement={"top-center"}
-                className='h-[50rem] overflow-scroll border border-black'
+                className='h-[50rem] overflow-scroll'
                 onOpenChange={(newState) => {
                     onOpenChange(newState);
                     if (!newState) {
@@ -346,11 +322,70 @@ const Categories = () => {
                                 <div className='grid grid-cols-2 gap-4'>
                                     <div>
 
+                                        <Input
+                                            size={'md'}
+                                            classNames={{
+                                                label: "font-bold font-3",
+                                                input: "font-semibold font",
+                                            }}
+                                            className='w-full my-4'
+                                            type="text"
+                                            value={CategoryName}
+                                            label={`Name of Category`}
+                                            onChange={(e) => SetCategoryName(e.target.value)}
+                                        />
 
-                                        <Select
-                                            items={parentCatgData}
+                                        <Textarea
+                                            size={'md'}
+                                            classNames={{
+                                                label: "font-bold font-3",
+                                                input: "font-semibold font",
+                                            }}
+                                            className='w-full my-4'
+                                            type="textarea"
+                                            label={`Description of Category`}
+                                            value={categoryDescription}
+                                            onValueChange={setCategoryDescription}
+
+                                        />
+                                        <div className="mb-4 border-black mt-6 gap-4 flex items-center">
+                                            <div className='text-xl font-semibold'>Visibility</div>
+                                            <Tooltip showArrow={true} color='secondary' placement="bottom-start" content="Do you want to make this category visible ? ">
+                                                <svg className="w-6 h-6 hover:cursor-pointer text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                                                </svg>
+                                            </Tooltip>
+                                            <Switch
+                                                defaultSelected={visibility}
+                                                size="lg"
+                                                color='secondary'
+                                                onChange={() => setVisibility(!visibility)}
+                                            >
+                                                {visibility ? 'yes' : 'no'}
+                                            </Switch>
+                                        </div>
+
+
+                                        <select className="mt-4 outline-none w-full rounded-md border bg-[#f4f4f5] py-5 px-2" value={selectedParentCategoryID} onChange={(e) => setSelectedParentCategoryID(e.target.value)} name="" id="">
+                                            <option value={"null"}>No parent Category</option>
+                                            {
+                                                updatedCategory.map((elem, index) => {
+                                                    return (
+                                                        <>
+                                                            <option key={index} value={elem._id}>{elem.name}</option>
+                                                        </>
+                                                    )
+                                                })
+                                            }
+
+                                        </select>
+
+                                        {updateCategoryId ? selectedParentCategoryID : ""}
+
+                                        {/* <Select
+                                            items={categoryData.filter((item) => item._id !== updateCategoryId)}
                                             variant="flat"
-                                            placeholder={selectedParentCategoryID ? selectedParentCategoryID : "Parnet Category"}
+                                            placeholder={categoryData && categoryData.length > 0 ? selectedParentCategoryID : "No Parent Category Exists (defaut NULL)"}
                                             labelPlacement="inside"
                                             name='parentCategory'
                                             value={selectedParentCategoryID}
@@ -358,221 +393,122 @@ const Categories = () => {
                                                 base: "w-full font-semibold font-black",
                                                 trigger: "min-h-unit-12 py-2 font-sans",
                                             }}
-
                                             onChange={(e) => setSelectedParentCategoryID(e.target.value)}
                                         >
                                             {(parent) => (
                                                 <SelectItem key={parent._id} textValue={parent.name}>
-                                                    <span className="font-sans font-semibold">{parent.name}</span>
+                                                    <span className="font-sans font-semibold">{parent.name}({parent._id})</span>
                                                 </SelectItem>
                                             )}
-                                        </Select>
+                                        </Select> */}
+                                        {/* {updateCategoryId ? <div className='font-bold mt-2'>Current Parent Category : {selectedParentCategoryID}</div> : null} */}
 
-                                        <div className="mb-4  border-black mt-6">
-                                            <label className="font-bold font-3 mt-4">Subcategories</label>
-                                            <div className='flex'>
 
-                                                {subcategories.map((subcategory, subIndex) => (
-                                                    <div key={subIndex} className="mb-2 w-full">
-                                                        <Input
-                                                            size={'md'}
-                                                            classNames={{
-                                                                label: "font-bold font-3",
-                                                                input: "font-semibold font",
-                                                            }}
-                                                            className='w-full mt-4'
-                                                            type="text"
-                                                            label={`Subcategory ${subIndex + 1}`}
-                                                            value={subcategory.name}
-                                                            onChange={(e) => {
-                                                                const updatedSubcategories = [...subcategories];
-                                                                updatedSubcategories[subIndex].name = e.target.value;
-                                                                setSubcategories(updatedSubcategories);
-                                                            }}
-                                                        />
-
-                                                        <div className="ml-4 mt-6">
-                                                            <label className="font-bold font-3 mt-6">Items</label>
-                                                            {subcategory.items.map((item, itemIndex) => (
-                                                                <div className='flex gap-2 mt-4'>
-
-                                                                    <Input
-                                                                        key={itemIndex}
-                                                                        size={'sm'}
-                                                                        classNames={{
-                                                                            label: "font-bold font-3",
-                                                                            input: "font-semibold font",
-                                                                        }}
-                                                                        type="text"
-
-                                                                        label={`Item ${itemIndex + 1}`}
-                                                                        value={item}
-                                                                        onChange={(e) => {
-                                                                            const updatedSubcategories = [...subcategories];
-                                                                            updatedSubcategories[subIndex].items[itemIndex] = e.target.value;
-                                                                            setSubcategories(updatedSubcategories);
-                                                                        }}
-                                                                    />
-
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleDeleteItem(subIndex, itemIndex)}
-                                                                        className="bg-black text-white w-fit px-4 py-2 rounded ml-2"
-                                                                    >
-                                                                        -
-                                                                    </button>
-                                                                </div>
-                                                            ))}
-
-                                                            <div className='flex gap-4'>
-
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        const updatedSubcategories = [...subcategories];
-                                                                        updatedSubcategories[subIndex].items.push("");
-                                                                        setSubcategories(updatedSubcategories);
-                                                                    }}
-                                                                    className="bg-black text-sm text-white px-4 py-2 rounded mt-4"
-                                                                >
-                                                                    Add Item
-                                                                </button>
-
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={handleAddToTable}
-                                                                    className="bg-black text-white px-4 py-2 rounded mt-4"
-                                                                >
-                                                                    Add to Table
-                                                                </button>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                                {/* <button
-                                                    type="button"
-                                                    onClick={() => setSubcategories([...subcategories, { name: "", items: [""] }])}
-                                                    className="bg-green-500 h-fit text-white px-2 py-1 rounded"
-                                                >
-                                                    Add Subcategory
-                                                </button> */}
-                                            </div>
-
-                                        </div>
 
                                     </div>
-                                    <div className="col-span-1 h-full w-full border">
-                                        {/* Display Table Here */}
-                                        {console.log(-tableData)}
-                                        <Table
-                                            classNames={{
-                                                base: "max-h-[100%] overflow-scroll",
-                                                table: "min-h-[70px]",
-                                            }}
-                                            aria-label="Categories Table"
-                                        >
-                                            <TableHeader>
-                                                <TableColumn>Main Category</TableColumn>
-                                                <TableColumn>Subcategories</TableColumn>
-                                                <TableColumn>Items</TableColumn>
-                                                <TableColumn>ACTIONS</TableColumn>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {tableData.map((data, index) => (
+                                    <div className="col-span-1 h-full w-full ">
+                                        <div>
+                                            <h1 className='font-extrabold my-2'>Main Image</h1>
+                                            <div className='flex items-center justify-between'>
+                                                <input
+                                                    type="file"
+                                                    onChange={handleMainImageChange}
+                                                    className="hidden"
+                                                    id="mainImageInput"
+                                                    name="main_image"
+                                                />
+                                                <div className='flex gap-2'>
 
-                                                    <TableRow key={index}>
-                                                        <TableCell>
-                                                            {data.type ? (
-                                                                parentCatgData
-                                                                    .filter((item) => item._id === data.type)
-                                                                    .map((matchedItem) => {
-                                                                        console.log(matchedItem.name);
-                                                                        return matchedItem.name;
-                                                                    })[0] || "No Parent Category"
-                                                            ) : (
-                                                                "No Parent Category"
-                                                            )}
-                                                        </TableCell>
+                                                    <label htmlFor="mainImageInput" className="text-center px-4 rounded-lg border border-black cursor-pointer">
+                                                        Main Image
+                                                    </label>
 
-                                                        <TableCell>
-                                                            {data.value.map((subcategory, subIndex) => (
-                                                                <div key={subIndex}>
-                                                                    <p className='bold'>{subcategory.name}</p>
-                                                                </div>
-                                                            ))}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {data.value.map((subcategory, subIndex) => (
-                                                                <div key={subIndex}>
-                                                                    <ul className='list-disc'>
-                                                                        {subcategory.items.map((item, itemIndex) => (
-                                                                            <li key={itemIndex}>{item}</li>
-                                                                        ))}
-                                                                    </ul>
-                                                                </div>
-                                                            ))}
-                                                        </TableCell>
-                                                        <TableCell className='flex gap-4'>
-                                                            {/* Edit and delete buttons for each row */}
-                                                            <span
-                                                                className="text-lg text-danger cursor-pointer active:opacity-50 inline-block"
-                                                                onClick={() => removeAttributeFromTable(index)}
-                                                            >
-                                                                {/* SVG for delete */}
-                                                                <svg
-                                                                    aria-hidden="true"
-                                                                    fill="none"
-                                                                    focusable="false"
-                                                                    height="1em"
-                                                                    role="presentation"
-                                                                    viewBox="0 0 20 20"
-                                                                    width="1em"
-                                                                >
-                                                                    <path
-                                                                        d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332"
-                                                                        stroke="currentColor"
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={1.5}
-                                                                    />
-                                                                    <path
-                                                                        d="M7.08331 4.14169L7.26665 3.05002C7.39998 2.25835 7.49998 1.66669 8.90831 1.66669H11.0916C12.5 1.66669 12.6083 2.29169 12.7333 3.05835L12.9166 4.14169"
-                                                                        stroke="currentColor"
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={1.5}
-                                                                    />
-                                                                    <path
-                                                                        d="M15.7084 7.61664L15.1667 16.0083C15.075 17.3166 15 18.3333 12.675 18.3333H7.32502C5.00002 18.3333 4.92502 17.3166 4.83335 16.0083L4.29169 7.61664"
-                                                                        stroke="currentColor"
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={1.5}
-                                                                    />
-                                                                    <path
-                                                                        d="M8.60834 13.75H11.3833"
-                                                                        stroke="currentColor"
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={1.5}
-                                                                    />
-                                                                    <path
-                                                                        d="M7.91669 10.4167H12.0834"
-                                                                        stroke="currentColor"
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={1.5}
-                                                                    />
-                                                                </svg>
-                                                            </span>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
+                                                    {mainImage?.name}
+                                                </div>
+                                                {
+                                                    mainImageLink ?
+                                                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
+                                                            <path fill="#4caf50" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#ccff90" d="M34.602,14.602L21,28.199l-5.602-5.598l-2.797,2.797L21,33.801l16.398-16.402L34.602,14.602z"></path>
+                                                        </svg>
+                                                        :
+                                                        <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" onClick={(e) => uploadImage(e, 'main')} >
+                                                            Upload
+                                                        </Button>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div className='my-4'>
+                                            <h1 className='font-extrabold my-2'>Hover Image</h1>
+                                            <div className='flex items-center justify-between'>
+                                                <input
+                                                    type="file"
+                                                    onChange={handleHoverImageChange}
+                                                    placeholder='Hover Image'
+                                                    className="hidden"
+                                                    id="hoverImageInput"
+                                                    name="hover_image"
+                                                />
+                                                <div className='flex gap-2'>
+
+                                                    <label htmlFor="hoverImageInput" className="text-center px-4 rounded-lg border border-black cursor-pointer">
+                                                        Main Image
+                                                    </label>
+
+                                                    {hoverImage?.name}
+                                                </div>
+                                                {
+                                                    hoverImageLink ?
+                                                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
+                                                            <path fill="#4caf50" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#ccff90" d="M34.602,14.602L21,28.199l-5.602-5.598l-2.797,2.797L21,33.801l16.398-16.402L34.602,14.602z"></path>
+                                                        </svg>
+                                                        :
+                                                        <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" onClick={(e) => uploadImage(e, 'hover')} >
+                                                            Upload
+                                                        </Button>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div className='grid grid-cols-2 border border-gray-300 w-full h-fit gap-4 p-4 '>
+                                            {
+                                                hoverImageLink ?
+                                                    <>
+                                                        <div className='border rounded-md border-gray-500 p-2 flex flex-col items-center justify-center col-span-1 w-full min-h-full max-h-[13rem]'>
+                                                            <img className='w-full h-full object-cover' src={hoverImageLink} alt="" />
+                                                        </div>
+                                                    </>
+                                                    :
+                                                    <>
+                                                        <div className='border rounded-md text-center font-semibold border-black p-2  flex flex-col items-center justify-center col-span-1 w-full h-[13rem]'>
+                                                            Hover Image will be shown here once uploaded !
+                                                        </div>
+                                                    </>
+                                            }
+                                            {
+                                                mainImageLink ?
+                                                    <>
+                                                        <div className='border rounded-md border-gray-500  p-2  flex flex-col items-center justify-center col-span-1 w-full min-h-full max-h-[13rem]'>
+                                                            <img className='!w-full !h-full object-cover' src={mainImageLink} alt="" />
+                                                        </div>
+                                                    </>
+
+                                                    :
+                                                    <>
+                                                        <div className='border font-semibold text-center border-black p-2  flex flex-col items-center justify-center col-span-1 w-full h-[13rem]'>
+                                                            Main Image will be shown here once uploaded !
+                                                        </div>
+                                                    </>
+                                            }
+
+                                            <div className='font-extrabold text-center w-full h-full border border-black'>Main Image</div>
+
+                                            <div className='font-extrabold text-center w-full h-full border border-black'>Hover Image</div>
 
 
-                                        </Table>
+
+
+                                        </div>
                                     </div>
                                 </div>
                             </ModalBody>

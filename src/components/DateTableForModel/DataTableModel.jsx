@@ -82,32 +82,44 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user._id}
+                        {user?._id}
                     </p>
                 );
-            case "subcategories":
+
+
+            case "name":
                 return (
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user?.subcategories.map((elem, index) => {
-                            return (
-                                <div className='flex gap-1'>
-                                    <div>{index + 1}. </div>
-                                    {elem.name},
-                                </div>
-                            )
-                        })}
+                        {user?.name}
                     </p>
                 );
-            case "parentCategory":
+            case "isVisible":
                 return (
                     <p
-                        className='font-2 font-medium text-[#000]'
+                        className='font-2 font-medium py-4 flex items-center justify-center text-[#000]'
                     >
-                        {user?.parentCategory?.name || "No Parent Category"}
+                        {user?.isVisible ?
+                            <div className='bg-green-600 py-1 rounded-full text-white px-6 text-center w-fit '>
+                                Visible
+                            </div>
+                            :
+                            <div className='bg-orange-600 py-1 rounded-full text-white px-6 text-center w-fit '>
+                                Not Visible
+                            </div>
+                        }
                     </p>
                 );
+            case "hoverImage":
+                return (
+                    <p
+                        className='w-[5rem] h-[5rem] font-2 font-medium text-[#000]'
+                    >
+                        <img className='w-full h-full rounded-lg object-cover' src={user?.hoverImage} alt="" />
+                    </p>
+                );
+
             case "options":
                 return (
                     <p
@@ -120,6 +132,16 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         }
                     </p>
                 );
+
+            case "parentCategory":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user?.parentCategory ? user?.parentCategory.name : "No Parent Category"}
+                    </p>
+                );
+
             case "createdAt":
                 return (
                     <div className="font-2 font-medium text-[#000]">
