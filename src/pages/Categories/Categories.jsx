@@ -228,34 +228,40 @@ const Categories = () => {
         }
     };
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(prepareCategoryValues())
 
+        // Validate input fields
+        if (!CategoryName || !categoryDescription || !mainImage || !hoverImage) {
+            toast.error('Please fill in all required fields and upload images.');
+            return;
+        }
 
         try {
             dispatch(SetLoader(true));
             const response = await CreateCategory(prepareCategoryValues());
             dispatch(SetLoader(false));
+
+            console.log(response)
+            console.log(response.data)
+
             if (response.success) {
                 await getCategoryData();
-                toast.success(response.message)
-                // setCategoryData(prevData => [...prevData, { _id: response.categoryDoc._id, name: response.categoryDoc.name, hoverImage: response.categoryDoc.hoverImage, isVisible: response.categoryDoc.isVisible, createdAt: response.categoryDoc.createdAt, actions: "" }]);
-                navigate("/categories")
-            }
-            else {
-                throw new Error(response.message);
+                toast.success(response.message);
+                // Do not navigate or close the modal on success
+            } else {
+                // Check if response.data has an error message
+                const errorMessage = response.data?.error || response.data?.message || "An unknown error occurred";
+                toast.error(errorMessage);
             }
 
         } catch (error) {
             dispatch(SetLoader(false));
-            console.log(error)
-            toast.error(error)
+            console.error(error);
+            toast.error();
         }
-
-
     };
+
 
     const updatedCategory = categoryData.filter((item) => item._id !== updateCategoryId)
 
@@ -380,7 +386,7 @@ const Categories = () => {
 
                                         </select>
 
-                                        {updateCategoryId ? selectedParentCategoryID : ""}
+                                        {/* {updateCategoryId ? selectedParentCategoryID : ""} */}
 
                                         {/* <Select
                                             items={categoryData.filter((item) => item._id !== updateCategoryId)}

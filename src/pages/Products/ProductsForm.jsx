@@ -849,7 +849,7 @@ const ProductsForm = () => {
 
 
 
-                                        <Select
+                                        {/* <Select
                                             items={subCategoryData}
                                             variant='flat'
                                             label="Select Sub Category"
@@ -869,10 +869,10 @@ const ProductsForm = () => {
                                                     {elem.name}
                                                 </SelectItem>
                                             ))}
-                                        </Select>
+                                        </Select> */}
 
 
-                                        <Select
+                                        {/* <Select
                                             items={subSubCategoryData}
                                             variant='flat'
                                             label="Select Sub Sub Category"
@@ -890,7 +890,7 @@ const ProductsForm = () => {
                                                     {elem}
                                                 </SelectItem>
                                             ))}
-                                        </Select>
+                                        </Select> */}
                                     </div>
 
                                 </Card>
