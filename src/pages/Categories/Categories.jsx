@@ -426,7 +426,7 @@ const Categories = () => {
                                                 <div className='flex gap-2'>
 
                                                     <label htmlFor="mainImageInput" className="text-center px-4 rounded-lg border border-black cursor-pointer">
-                                                        Main Image
+                                                        Select Main Image
                                                     </label>
 
                                                     {mainImage?.name}
@@ -458,7 +458,7 @@ const Categories = () => {
                                                 <div className='flex gap-2'>
 
                                                     <label htmlFor="hoverImageInput" className="text-center px-4 rounded-lg border border-black cursor-pointer">
-                                                        Main Image
+                                                        Select Hover Image
                                                     </label>
 
                                                     {hoverImage?.name}
@@ -478,20 +478,6 @@ const Categories = () => {
 
                                         <div className='grid grid-cols-2 border border-gray-300 w-full h-fit gap-4 p-4 '>
                                             {
-                                                hoverImageLink ?
-                                                    <>
-                                                        <div className='border rounded-md border-gray-500 p-2 flex flex-col items-center justify-center col-span-1 w-full min-h-full max-h-[13rem]'>
-                                                            <img className='w-full h-full object-cover' src={hoverImageLink} alt="" />
-                                                        </div>
-                                                    </>
-                                                    :
-                                                    <>
-                                                        <div className='border rounded-md text-center font-semibold border-black p-2  flex flex-col items-center justify-center col-span-1 w-full h-[13rem]'>
-                                                            Hover Image will be shown here once uploaded !
-                                                        </div>
-                                                    </>
-                                            }
-                                            {
                                                 mainImageLink ?
                                                     <>
                                                         <div className='border rounded-md border-gray-500  p-2  flex flex-col items-center justify-center col-span-1 w-full min-h-full max-h-[13rem]'>
@@ -501,11 +487,27 @@ const Categories = () => {
 
                                                     :
                                                     <>
-                                                        <div className='border font-semibold text-center border-black p-2  flex flex-col items-center justify-center col-span-1 w-full h-[13rem]'>
+                                                        <div className='border rounded-md font-semibold text-center border-black p-2  flex flex-col items-center justify-center col-span-1 w-full h-[13rem]'>
                                                             Main Image will be shown here once uploaded !
                                                         </div>
                                                     </>
                                             }
+
+                                            {
+                                                hoverImageLink ?
+                                                    <>
+                                                        <div className='border rounded-md border-gray-500 p-2 flex flex-col items-center justify-center col-span-1 w-full min-h-full max-h-[13rem]'>
+                                                            <img className='w-full h-full object-cover' src={hoverImageLink} alt="" />
+                                                        </div>
+                                                    </>
+                                                    :
+                                                    <>  
+                                                        <div className='border rounded-md text-center font-semibold border-black p-2  flex flex-col items-center justify-center col-span-1 w-full h-[13rem]'>
+                                                            Hover Image will be shown here once uploaded !
+                                                        </div>
+                                                    </>
+                                            }
+
 
                                             <div className='font-extrabold text-center w-full h-full border border-black'>Main Image</div>
 
