@@ -31,6 +31,7 @@ import { GetTagData } from '../../apicalls/tag';
 import { GetHighlightData } from '../../apicalls/highlights';
 import { GetCategoryData } from '../../apicalls/category';
 import AttributeForm from '../../components/AttributeForm/Attribute';
+import MultiSelect from '../../components/MultiSelect/MultiSelect';
 
 const ProductsForm = () => {
     const navigate = useNavigate();
@@ -825,7 +826,7 @@ const ProductsForm = () => {
                             </Tab>
 
                             <Tab key={"product_category"} title="Categories">
-                                <Card className='p-5 gap-2 w-full '>
+                                <Card className='p-5 gap-2 w-full h-fit overflow-scroll'>
                                     <div className='flex items-center gap-6 w-full '>
                                         <Select
                                             labelPlacement="inside"
@@ -895,6 +896,15 @@ const ProductsForm = () => {
 
                                 </Card>
                             </Tab>
+                            <Tab key={"linked_products"} title="Linked Products">
+                                <Card className='p-5 gap-2 w-full min-h-[20rem] '>
+                                    <div className='flex items-center gap-6 w-full '>
+                                        <span>Upsells</span>
+                                       <MultiSelect categoriesData={categoriesData}/>
+                                    </div>
+
+                                </Card>
+                            </Tab>
                         </Tabs>
                         <div className='mt-4'>
                             <div className='font-sans font-semibold my-4'>Short Description</div>
@@ -908,6 +918,7 @@ const ProductsForm = () => {
                     <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
                         Create
                     </Button>
+                    <MultiSelect categoriesData={categoriesData}/>
                 </form>
             </div >
         </div >
