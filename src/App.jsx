@@ -97,7 +97,7 @@ function App() {
       <div><Toaster /></div>
       <Header />
       {/* loader */}
-      {loading && <div className="absolute backdrop-blur-sm z-[99] left-0 bottom-0  !h-[100%] !w-[100%] flex justify-center items-center">
+      {loading && <div className="absolute backdrop-blur-sm z-[101] left-0 bottom-0 right-0 top-0  !h-[100%] !w-[100%] flex justify-center items-center">
         <Spinner size='md' color="current" />
       </div>
       }

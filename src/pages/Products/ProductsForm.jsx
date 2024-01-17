@@ -32,6 +32,7 @@ import { GetHighlightData } from '../../apicalls/highlights';
 import { GetCategoryData } from '../../apicalls/category';
 import AttributeForm from '../../components/AttributeForm/Attribute';
 import MultiSelect from '../../components/MultiSelect/MultiSelect';
+import Shippingform from '../../components/ShippingForm/Shippingform';
 
 const ProductsForm = () => {
     const navigate = useNavigate();
@@ -900,10 +901,13 @@ const ProductsForm = () => {
                                 <Card className='p-5 gap-2 w-full min-h-[20rem] '>
                                     <div className='flex items-center gap-6 w-full '>
                                         <span>Upsells</span>
-                                       <MultiSelect categoriesData={categoriesData}/>
+                                        <MultiSelect categoriesData={categoriesData} />
                                     </div>
 
                                 </Card>
+                            </Tab>
+                            <Tab key={"shipping"} title="Shipping">
+                                <Shippingform />
                             </Tab>
                         </Tabs>
                         <div className='mt-4'>
@@ -918,7 +922,7 @@ const ProductsForm = () => {
                     <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
                         Create
                     </Button>
-                    <MultiSelect categoriesData={categoriesData}/>
+                    <MultiSelect categoriesData={categoriesData} />
                 </form>
             </div >
         </div >
