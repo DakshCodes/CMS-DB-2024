@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 
+export default function MultiSelect({ data, onSelectChange }) {
+  const [selectedOption, setSelectedOption] = useState(null);
 
+  const options = data?.map(elem => ({
+    value: elem._id,
+    label: elem.name || elem.productName
+  }));
 
-export default function MultiSelect({categoriesData}) {
-    const [selectedOption, setSelectedOption] = useState(null);
-    
-    const options = categoriesData.map(category => ({
-      value: category.name,
-      label: category.name
-    }));
-    
+  useEffect(() => {
+    // Call the callback function with the selected values
+    onSelectChange(selectedOption);
+  }, [selectedOption, onSelectChange]);
+
   return (
     <div className="App">
       <Select
-      className='w-full'
+        className='w-[30rem]'
         defaultValue={selectedOption}
         onChange={setSelectedOption}
         options={options}

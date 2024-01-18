@@ -21,7 +21,7 @@ import {
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { UploadImage } from '../../apicalls/user';
-import { CreateProduct, EditProductById, GetProductDataByID } from '../../apicalls/product';
+import { CreateProduct, EditProductById, GetProductDataByID, GetProductsData } from '../../apicalls/product';
 import toast from 'react-hot-toast';
 import { SetLoader } from '../../redux/loadersSlice';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -58,6 +58,31 @@ const ProductsForm = () => {
     const [selectedMainCategory, setSelectedMainCategory] = useState('');
     const [selectedSubCategory, setSelectedSubCategory] = useState('');
     const [selectedSubSubCategory, setSelectedSubSubCategory] = useState('');
+    const [productsData, setProductsData] = useState([]);
+
+
+    const getProductsData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetProductsData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setProductsData(response.products);
+                console.log("products data : ", response.products)
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message);
+        }
+    };
+
+    React.useEffect(() => {
+        getProductsData();
+    }, [])
+
+
 
 
 
@@ -80,6 +105,8 @@ const ProductsForm = () => {
         main_category: '',
         sub_category: '',
         sub_sub_category: '',
+        upSells: [],
+        crossSells: [],
         product_images: [],
         attributes: [], // New field to store attributes array of objects
         producthighlights: [], // New field to store attributes array of objects
@@ -87,6 +114,19 @@ const ProductsForm = () => {
     });
 
     const { productName, regularPrice, salePrice, mainDescription, shortDescription, main_category, sub_category, sub_sub_category, product_images, attributes, producthighlights, tags } = formValues;
+
+    const [crossSellSelection, setCrossSellSelection] = useState([]);
+    const [upsellSelection, setUpsellSelection] = useState([]);
+
+    // Handle cross-sell selection change
+    const handleCrossSellChange = (selectedValues) => {
+        setCrossSellSelection(selectedValues);
+    };
+
+    // Handle upsell selection change
+    const handleUpsellChange = (selectedValues) => {
+        setUpsellSelection(selectedValues);
+    };
 
 
     React.useEffect(() => {
@@ -898,12 +938,15 @@ const ProductsForm = () => {
                                 </Card>
                             </Tab>
                             <Tab key={"linked_products"} title="Linked Products">
-                                <Card className='p-5 gap-2 w-full min-h-[20rem] '>
-                                    <div className='flex items-center gap-6 w-full '>
-                                        <span>Upsells</span>
-                                        <MultiSelect categoriesData={categoriesData} />
+                                <Card className='p-5 gap-2 flex flex-row items-start w-full min-h-[20rem] '>
+                                    <div className='flex  items-center gap-6 w-full '>
+                                        <span className='font-extrabold'>Upsells : </span>
+                                        <MultiSelect data={categoriesData} onSelectChange={handleUpsellChange} />
                                     </div>
-
+                                    <div className='flex  items-center gap-6 w-full '>
+                                        <span className='font-extrabold'>Cross Sells : </span>
+                                        <MultiSelect data={productsData} onSelectChange={handleCrossSellChange} />
+                                    </div>
                                 </Card>
                             </Tab>
                             <Tab key={"shipping"} title="Shipping">
@@ -922,7 +965,6 @@ const ProductsForm = () => {
                     <Button isLoading={false} className="font-sans ml-auto text-[#fff] bg-[#000] font-medium" type="submit">
                         Create
                     </Button>
-                    <MultiSelect categoriesData={categoriesData} />
                 </form>
             </div >
         </div >
