@@ -22,7 +22,8 @@ import { useNavigate } from 'react-router-dom';
 
 const AttributeForm = ({ setFormValues }) => {
     const [attributeData, setAttributeData] = useState([]);
-    const [selectedAttribute, setSelectedAttribute] = useState(null);
+    const [selectedAttribute, setSelectedAttribute] = useState();
+    const [selectedAttributeHead, setselectedAttributeHead] = useState([]);
     const [selectedValues, setSelectedValues] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [stockValue, setStockValue] = useState('');
@@ -55,7 +56,7 @@ const AttributeForm = ({ setFormValues }) => {
         const selectedAttributeName = e.target.value;
         const selectedAttributeOne = attributeData.find((attribute) => attribute.name === selectedAttributeName);
         setvaluedata(selectedAttributeOne);
-        setSelectedAttribute(selectedAttributeOne);
+        setSelectedAttribute(selectedAttributeName);
     };
 
     const handleSelectionChange = (e) => {
@@ -64,7 +65,6 @@ const AttributeForm = ({ setFormValues }) => {
 
     const addAttributeToTable = () => {
         if (selectedAttribute && selectedValues.length > 0) {
-
             const createOrUpdateObjects = (existingData, newValues) => {
 
                 if (existingData.length > 0) {
@@ -120,7 +120,7 @@ const AttributeForm = ({ setFormValues }) => {
                 const newTableData = createOrUpdateObjects([], selectedValues);
                 setTableData(newTableData);
             }
-
+            setselectedAttributeHead([...selectedAttributeHead, selectedAttribute]);
             setSelectedValues([]);
             setSelectedAttribute(null);
         }
@@ -138,7 +138,7 @@ const AttributeForm = ({ setFormValues }) => {
     };
 
     const addStockMain = () => {
-        if (tableData.length > 0) {
+        if (tableData.length > 0 && tableData.every(item => item.stock.trim() !== '')) {
             // Save the previous value of mainstockTable
             const previousMainstockTable = [...mainstockTable];
 
@@ -164,6 +164,9 @@ const AttributeForm = ({ setFormValues }) => {
                 attributes: [...mainstockTable, ...formattedTableData],
             }));
             setTableData([]);
+        } else {
+            // Display a toast message indicating that stock is required
+            toast.error("Stock is required for all items");
         }
     };
 
@@ -178,10 +181,14 @@ const AttributeForm = ({ setFormValues }) => {
     const handleStockChange = (index, value) => {
         const updatedTableData = tableData.map((item, i) => {
             if (i === index) {
+                // Ensure that value1 and value2 are present before splitting
+                const value1 = item.value1 || '';
+                const value2 = item.value2 || '';
+
                 return {
                     ...item,
                     stock: value,
-                    sku: item.value1.split("")[0] + item.value2.split("")[0] + Math.random().toPrecision().split("")[2] + Math.random().toPrecision().split("")[2] + Math.random().toPrecision().split("")[2] + Math.random().toPrecision().split("")[2] + Math.random().toPrecision().split("")[2]
+                    sku: `${value1.split("")[0]}${value2.split("")[0]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}`
                 };
             }
             return item;
@@ -189,7 +196,8 @@ const AttributeForm = ({ setFormValues }) => {
         setTableData(updatedTableData);
     };
 
-    console.log(mainstockTable, "main")
+    console.log(tableData, "main")
+    console.log(selectedAttributeHead, "attribute")
     // console.log(selectedValues, "values")
 
     return (
@@ -265,83 +273,99 @@ const AttributeForm = ({ setFormValues }) => {
                         aria-label="Attribute Values Table"
                     >
                         <TableHeader>
-                            <TableColumn>VALUE1</TableColumn>
-                            <TableColumn>VALUE2</TableColumn>
+                            {selectedAttributeHead?.map((option, index) => (
+                                <TableColumn key={index}>{`VALUE${index + 1}`}</TableColumn>
+                            ))}
                             <TableColumn>STOCKS</TableColumn>
                             <TableColumn>ACTIONS</TableColumn>
                         </TableHeader>
                         <TableBody>
-                            {tableData.map((object, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{object.value1}</TableCell>
-                                    <TableCell>{object.value2}</TableCell>
-                                    <TableCell>
-                                        <Input
-                                            type="number"
-                                            placeholder="0"
-                                            labelPlacement="outside"
-                                            className='max-w-max'
-                                            value={object.stock}
-                                            onChange={(e) => handleStockChange(index, e.target.value)}
-                                        />
-                                    </TableCell>
-                                    <TableCell className='flex gap-4'>
-                                        {/* Edit and delete buttons for each row */}
+                            {tableData.map((object, index) => {
+                                // Dynamically render cells based on the keys of the object
+                                const cells = Object.keys(object)
+                                    .filter((key) => key.startsWith('value'))
+                                    .map((key) => (
+                                        <TableCell key={key}>{object[key]}</TableCell>
+                                    ));
 
-                                        <span
-                                            className="text-lg text-danger cursor-pointer active:opacity-50  inline-block"
-                                            onClick={() => removeAttributeFromTable(index)}
-                                        >
-                                            <svg
-                                                aria-hidden="true"
-                                                fill="none"
-                                                focusable="false"
-                                                height="1em"
-                                                role="presentation"
-                                                viewBox="0 0 20 20"
-                                                width="1em"
+                                // Validate the number of cells
+                                if (cells.length !== selectedAttributeHead.length) {
+                                    toast.error(`Cell count must match column count. Found ${cells.length} cells and ${selectedAttributeHead.length} columns.`);
+                                    // You can display an error message or handle the error as needed
+                                    return null;
+                                }
+
+                                return (
+                                    <TableRow key={index}>
+                                        {cells}
+                                        {/* Render the stock input */}
+                                        <TableCell>
+                                            <Input
+                                                type="number"
+                                                placeholder="0"
+                                                labelPlacement="outside"
+                                                className='max-w-max'
+                                                value={object.stock}
+                                                onChange={(e) => handleStockChange(index, e.target.value)}
+                                            />
+                                        </TableCell>
+                                        <TableCell className='flex gap-4'>
+
+                                            <span
+                                                className="text-lg text-danger cursor-pointer active:opacity-50  inline-block"
+                                                onClick={() => removeAttributeFromTable(index)}
                                             >
-                                                <path
-                                                    d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={1.5}
-                                                />
-                                                <path
-                                                    d="M7.08331 4.14169L7.26665 3.05002C7.39998 2.25835 7.49998 1.66669 8.90831 1.66669H11.0916C12.5 1.66669 12.6083 2.29169 12.7333 3.05835L12.9166 4.14169"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={1.5}
-                                                />
-                                                <path
-                                                    d="M15.7084 7.61664L15.1667 16.0083C15.075 17.3166 15 18.3333 12.675 18.3333H7.32502C5.00002 18.3333 4.92502 17.3166 4.83335 16.0083L4.29169 7.61664"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={1.5}
-                                                />
-                                                <path
-                                                    d="M8.60834 13.75H11.3833"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={1.5}
-                                                />
-                                                <path
-                                                    d="M7.91669 10.4167H12.0834"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={1.5}
-                                                />
-                                            </svg>
+                                                <svg
+                                                    aria-hidden="true"
+                                                    fill="none"
+                                                    focusable="false"
+                                                    height="1em"
+                                                    role="presentation"
+                                                    viewBox="0 0 20 20"
+                                                    width="1em"
+                                                >
+                                                    <path
+                                                        d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                    />
+                                                    <path
+                                                        d="M7.08331 4.14169L7.26665 3.05002C7.39998 2.25835 7.49998 1.66669 8.90831 1.66669H11.0916C12.5 1.66669 12.6083 2.29169 12.7333 3.05835L12.9166 4.14169"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                    />
+                                                    <path
+                                                        d="M15.7084 7.61664L15.1667 16.0083C15.075 17.3166 15 18.3333 12.675 18.3333H7.32502C5.00002 18.3333 4.92502 17.3166 4.83335 16.0083L4.29169 7.61664"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                    />
+                                                    <path
+                                                        d="M8.60834 13.75H11.3833"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                    />
+                                                    <path
+                                                        d="M7.91669 10.4167H12.0834"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={1.5}
+                                                    />
+                                                </svg>
 
-                                        </span>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                            </span>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                     <Button
