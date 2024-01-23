@@ -375,8 +375,9 @@ const ProductsForm = () => {
     };
 
     const changeColor = (e) => {
-        const selectColor = e.target.value;
-        setImgColor(selectColor);
+        // const selectColor = e.target.value;
+        console.log(e.target.value)
+        setImgColor(e.target.value);
     };
 
 
@@ -562,7 +563,8 @@ const ProductsForm = () => {
     };
 
 
-    console.log(ImageCombo, "images");
+    // console.log(attributeData.find(item => item?.name === "Colors"), "attri");
+    console.log(ImgColor, 'img')
 
 
     return (
@@ -650,9 +652,9 @@ const ProductsForm = () => {
                                         onChange={(e) => changeColor(e)}
                                         defaultSelectedKeys={ImgColor}
                                     >
-                                        {attributeData.map((animal) => (
-                                            <SelectItem key={animal.name} value={animal.name}>
-                                                {animal.name}
+                                        {attributeData?.find(item => item?.name === "Colors")?.options.map((animal) => (
+                                            <SelectItem key={animal?._id} value={animal.value}>
+                                                {animal.value}
                                             </SelectItem>
                                         ))}
                                     </Select>
@@ -695,7 +697,7 @@ const ProductsForm = () => {
                                         {ImageCombo && ImageCombo.length > 0 ? (
                                             ImageCombo.map((unitImage, index) => (
                                                 <div key={index} className='w-[100%]  h-[100%] col-span-1'>
-                                                    <h1 className='font-sans mx-5 font-bold'>{unitImage.color}</h1>
+                                                    {/* <h1 className='font-sans mx-5 font-bold'>{unitImage.color}</h1> */}
                                                     <img className='w-full h-full object-cover rounded-xl' src={unitImage.src} alt="" />
                                                 </div>
                                             ))

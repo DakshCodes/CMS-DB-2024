@@ -188,7 +188,7 @@ const AttributeForm = ({ setFormValues }) => {
                 return {
                     ...item,
                     stock: value,
-                    sku: `${value1.split("")[0]}${value2.split("")[0]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}`
+                    sku: `${value1?.split("")[0]}${value2.split("")[0]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}${Math.random().toPrecision().split("")[2]}`
                 };
             }
             return item;

@@ -9,7 +9,6 @@ const Shippingform = ({ setFormValues }) => {
             width: "",
             height: "",
         },
-        shippingClass: '',
     });
 
     const handleWeightChange = (event) => {
@@ -37,17 +36,6 @@ const Shippingform = ({ setFormValues }) => {
         }));
     };
 
-    const handleShippingClassChange = (e) => {
-        const selectedShippingClass = e.target.value.split(",");
-        setFormData({
-            ...formData,
-            shippingClass: selectedShippingClass,
-        });
-        setFormValues((prevValues) => ({
-            ...prevValues,
-            shipping: { ...prevValues.shipping, shippingClass: selectedShippingClass },
-        }));
-    };
 
 
     console.log(formData, "data")
@@ -91,74 +79,6 @@ const Shippingform = ({ setFormValues }) => {
                         value={formData.dimensions.height}
                         onChange={(e) => handleDimensionsChange('height', e.target.value)}
                     />
-                </div>
-                <div className='flex flex-col gap-0 md:flex-row md:gap-10 justify-start  items-center'>
-                    <h1 className='font-2 font-[500] text-[#9166d4]'>Shipping Class</h1>
-                    <Select
-                        // className="max-w-xs"
-                        className="font-2 font-[400]  flex justify-center items-center max-w-xs"
-                        placeholder='No shipping class'
-                        // label="No shipping "
-                        value={formData.shippingClass}
-                        onChange={handleShippingClassChange}
-                    >
-                        <SelectItem
-                            key="argentina"
-                            startContent={<Avatar alt="Argentina" className="w-6 h-6" src="https://flagcdn.com/ar.svg" />}
-                        >
-                            Argentina
-                        </SelectItem>
-                        <SelectItem
-                            key="venezuela"
-                            startContent={<Avatar alt="Venezuela" className="w-6 h-6" src="https://flagcdn.com/ve.svg" />}
-                        >
-                            Venezuela
-                        </SelectItem>
-                        <SelectItem
-                            key="brazil"
-                            startContent={<Avatar alt="Brazil" className="w-6 h-6" src="https://flagcdn.com/br.svg" />}
-                        >
-                            Brazil
-                        </SelectItem>
-                        <SelectItem
-                            key="switzerland"
-                            startContent={
-                                <Avatar alt="Switzerland" className="w-6 h-6" src="https://flagcdn.com/ch.svg" />
-                            }
-                        >
-                            Switzerland
-                        </SelectItem>
-                        <SelectItem
-                            key="germany"
-                            startContent={<Avatar alt="Germany" className="w-6 h-6" src="https://flagcdn.com/de.svg" />}
-                        >
-                            Germany
-                        </SelectItem>
-                        <SelectItem
-                            key="spain"
-                            startContent={<Avatar alt="Spain" className="w-6 h-6" src="https://flagcdn.com/es.svg" />}
-                        >
-                            Spain
-                        </SelectItem>
-                        <SelectItem
-                            key="france"
-                            startContent={<Avatar alt="France" className="w-6 h-6" src="https://flagcdn.com/fr.svg" />}
-                        >
-                            France
-                        </SelectItem>
-                        <SelectItem
-                            key="italy"
-                            startContent={<Avatar alt="Italy" className="w-6 h-6" src="https://flagcdn.com/it.svg" />}
-                        >
-                            Italy
-                        </SelectItem>
-                        <SelectItem
-                            key="mexico"
-                            startContent={<Avatar alt="Mexico" className="w-6 h-6" src="https://flagcdn.com/mx.svg" />}
-                        >
-                            Mexico
-                        </SelectItem>
-                    </Select>
                 </div>
             </Card>
         </div>
