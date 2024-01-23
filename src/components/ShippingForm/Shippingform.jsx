@@ -1,8 +1,7 @@
 import { Avatar, Card, Input, Select, SelectItem } from '@nextui-org/react'
 import React, { useState } from 'react'
 
-const Shippingform = () => {
-    // State to store the form data
+const Shippingform = ({ setFormValues }) => {
     const [formData, setFormData] = useState({
         weight: "",
         dimensions: {
@@ -13,15 +12,17 @@ const Shippingform = () => {
         shippingClass: '',
     });
 
-    // Function to handle changes in the weight input
     const handleWeightChange = (event) => {
         setFormData({
             ...formData,
             weight: event.target.value,
         });
+        setFormValues((prevValues) => ({
+            ...prevValues,
+            shipping: { ...prevValues.shipping, weight: event.target.value },
+        }));
     };
 
-    // Function to handle changes in the dimensions inputs
     const handleDimensionsChange = (field, value) => {
         setFormData({
             ...formData,
@@ -30,18 +31,26 @@ const Shippingform = () => {
                 [field]: value,
             },
         });
+        setFormValues((prevValues) => ({
+            ...prevValues,
+            shipping: { ...prevValues.shipping, dimensions: { ...prevValues.shipping.dimensions, [field]: value } },
+        }));
     };
 
-    // Function to handle changes in the shipping class select
     const handleShippingClassChange = (e) => {
+        const selectedShippingClass = e.target.value.split(",");
         setFormData({
             ...formData,
-            shippingClass: e.target.value.split(","),
+            shippingClass: selectedShippingClass,
         });
+        setFormValues((prevValues) => ({
+            ...prevValues,
+            shipping: { ...prevValues.shipping, shippingClass: selectedShippingClass },
+        }));
     };
 
 
-    console.log(formData,"data")
+    console.log(formData, "data")
     return (
         <div>
             <Card className='px-6 py-4 flex gap-5 justify-start max-w-max  overflow-scroll h-max'>

@@ -111,6 +111,7 @@ const ProductsForm = () => {
         attributes: [], // New field to store attributes array of objects
         producthighlights: [], // New field to store attributes array of objects
         tags: [], // New field to store tags array of objects
+        shipping: {}, // New field to store tags array of objects
     });
 
     const { productName, regularPrice, salePrice, mainDescription, shortDescription, main_category, sub_category, sub_sub_category, product_images, attributes, producthighlights, tags } = formValues;
@@ -952,7 +953,7 @@ const ProductsForm = () => {
                                 </div>
                             </Tab>
                             <Tab key={"shipping"} title="Shipping">
-                                <Shippingform />
+                                <Shippingform setFormValues={setFormValues} />
                             </Tab>
                         </Tabs>
                         <div className='mt-4'>
