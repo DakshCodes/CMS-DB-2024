@@ -940,17 +940,19 @@ const ProductsForm = () => {
 
                                 </Card>
                             </Tab>
-                            <Tab key={"linked_products"} title="Linked Products">
-                                <Card className='p-5 gap-2 flex flex-row items-start w-full min-h-[20rem] '>
-                                    <div className='flex  items-center gap-6 w-full '>
+                            <Tab className='h-fit' key={"linked_products"} title="Linked Products">
+                                <div className='p-5 gap-2 flex flex-row items-start w-full ] '>
+                                    <div className='flex flex-col items-center gap-6 w-full '>
                                         <span className='font-extrabold'>Upsells : </span>
-                                        <MultiSelect data={categoriesData} onSelectChange={handleUpsellChange} />
+                                        <MultiSelect data={categoriesData} type={true} onSelectChange={handleUpsellChange} />
+                                        {/* {JSON.stringify(upsellSelection)} */}
                                     </div>
-                                    <div className='flex  items-center gap-6 w-full '>
+                                    <div className='flex flex-col items-center gap-6 w-full '>
                                         <span className='font-extrabold'>Cross Sells : </span>
-                                        <MultiSelect data={productsData} onSelectChange={handleCrossSellChange} />
+                                        <MultiSelect data={productsData} type={false} onSelectChange={handleCrossSellChange} />
+                                        {/* {JSON.stringify(crossSellSelection)} */}
                                     </div>
-                                </Card>
+                                </div>
                             </Tab>
                             <Tab key={"shipping"} title="Shipping">
                                 <Shippingform setFormValues={setFormValues} />
