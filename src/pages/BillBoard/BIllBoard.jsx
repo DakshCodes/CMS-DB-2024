@@ -2,6 +2,12 @@ import React from 'react'
 import DataTable from '../../components/DataTable/DataTable'
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
+import BannerIcon from "../../assets/banner.svg"
+import SliderIcon from "../../assets/slider.svg"
+import CardIcon from "../../assets/card.svg"
+import TabsIcon from "../../assets/tabs.svg"
+import LayoutIcon from "../../assets/layout.svg"
+import { Tab, Tabs } from '@nextui-org/react'
 
 const BIllBoard = () => {
     const columns = [
@@ -25,13 +31,74 @@ const BIllBoard = () => {
     ];
     return (
         <>
-            <div className="flex items-center justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
-                <div className="flex-1 ">
-                    <Heading title={`Billboards (0)`} description="Manage billboards for your store" />
-                </div>
-                <Butoon title={"Add New"} />
+            <div className="flex flex-col items-start  justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
+                <Tabs aria-label="Options" className='font-semibold' color="primary" variant="underlined">
+                    <Tab
+                        key="banner"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                {/* <GalleryIcon /> */}
+                                <span><img className='w-[2rem]' src={BannerIcon} alt="" /></span>
+                                <span>Banner</span>
+                                <span>(10)</span>
+                            </div>
+                        }
+                    >
+                        I am working on this
+                    </Tab>
+                    <Tab
+                        key="slider"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                {/* <MusicIcon /> */}
+                                <span><img className='w-[1.5rem]' src={SliderIcon} alt="" /></span>
+                                <span>Slider</span>
+                                <span>(10)</span>
+
+                            </div>
+                        }
+                    />
+                    <Tab
+                        key="img_layout"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                {/* <MusicIcon /> */}
+                                <span><img className='w-[1.5rem]' src={LayoutIcon} alt="" /></span>
+                                <span>Image Layout</span>
+                                <span>(10)</span>
+
+                            </div>
+                        }
+                    />
+                    <Tab
+                        key="card"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                <span><img className='w-[1.5rem]' src={CardIcon} alt="" /></span>
+                                {/* <VideoIcon /> */}
+                                <span>Card</span>
+                                <span>(10)</span>
+
+                            </div>
+                        }
+                    >
+                        I am working on this
+                    </Tab>
+                    <Tab
+                        key="multi_tabs"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                {/* <VideoIcon /> */}
+                                <span><img className='w-[4rem]' src={TabsIcon} alt="" /></span>
+                                <span>Multi Tabs</span>
+                                <span>(10)</span>
+
+                            </div>
+                        }
+                    />
+                </Tabs>
+
             </div >
-            <DataTable data={users} columnss={columns} />
         </>
     )
 }
