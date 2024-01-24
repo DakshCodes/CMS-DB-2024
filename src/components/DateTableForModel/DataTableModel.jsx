@@ -165,7 +165,9 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                             </DropdownTrigger>
                             <DropdownMenu className='font-2 font-medium text-[#000]'>
                                 <DropdownItem aria-label="Edit" onClick={() => update(user._id)}>Edit</DropdownItem>
-                                <DropdownItem aria-label="Delete" onClick={() => deleteitem(user._id)}>Delete</DropdownItem>
+                                {
+                                    !(user?.name == "Colors") ? (<DropdownItem aria-label="Delete"  onClick={() => deleteitem(user._id)}>Delete</DropdownItem>) : ("You Can't Delete")
+                                }
                             </DropdownMenu>
                         </Dropdown>
                     </div>

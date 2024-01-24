@@ -76,10 +76,10 @@ const Attributes = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (!isAttributeNameUnique(AttributeName)) {
-                toast.error("Attribute name must be unique.");
-                return;
-            }
+            // if (!isAttributeNameUnique(AttributeName)) {
+            //     toast.error("Attribute name must be unique.");
+            //     return;
+            // }
 
             dispatch(SetLoader(true));
             const response = await CreateAttribute({ name: AttributeName, values: attributeValuesTable });
@@ -155,10 +155,10 @@ const Attributes = () => {
         e.preventDefault();
 
         try {
-            if (!isAttributeNameUnique(AttributeName)) {
-                toast.error("Attribute name must be unique.");
-                return;
-            }
+            // if (!isAttributeNameUnique(AttributeName)) {
+            //     toast.error("Attribute name must be unique.");
+            //     return;
+            // }
             dispatch(SetLoader(true));
 
             const response = await UpdateAttribute(updateAttributeId, { name: AttributeName, values: attributeValuesTable });
@@ -210,8 +210,9 @@ const Attributes = () => {
                                         label: "font-bold font-3",
                                         input: "font-semibold font",
                                     }}
-
-                                    type="text" label="Name"
+                                    disabled={AttributeName == "Colors"}
+                                    type="text"
+                                    label={AttributeName == "Colors" ? ("You Can't Change The Name Add Values Only") : "Name"}
                                     onChange={(e) => SetAttributeName(e.target.value)}
                                     value={AttributeName}
                                 />
@@ -243,9 +244,9 @@ const Attributes = () => {
                                     classNames={{
                                         base: "max-h-[120px] overflow-scroll",
                                         table: "min-h-[70px]",
-                                        th:"text-center",
-                                        tr:"text-center",
-                                        td:"font-sans font-bold"
+                                        th: "text-center",
+                                        tr: "text-center",
+                                        td: "font-sans font-bold"
 
                                     }}
                                     aria-label="Attribute Values Table"
