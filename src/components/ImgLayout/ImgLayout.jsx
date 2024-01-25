@@ -239,7 +239,7 @@ const ImageLayout = () => {
                                     variant="flat"
                                 />
                                 <div className="img-form flex flex-col gap-5">
-                                    <h1 className='font font-[600]'>Add Your 5 Images</h1>
+                                    <h1 className='font font-[600]'>Add Your Images For Slider (minimum 5)</h1>
                                     <div className='flex gap-5 justify-start' >
                                         <Button color={(layout?.Images?.length === 5) ? "danger" : "success"}
                                             className='font-sans  text-[#fff] font-[900]'
