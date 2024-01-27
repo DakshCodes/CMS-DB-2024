@@ -10,6 +10,7 @@ import LayoutIcon from "../../assets/layout.svg"
 import { Card, Tab, Tabs } from '@nextui-org/react'
 import ImageLayout from '../../components/ImgLayout/ImgLayout'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
+import Multipletabs from '../../components/MultipleTab/MultipleTabs'
 
 const BIllBoard = () => {
     const columns = [
@@ -58,8 +59,8 @@ const BIllBoard = () => {
 
                             </div>
                         } >
-                            <SliderComponent />
-                        </Tab>
+                        <SliderComponent />
+                    </Tab>
                     <Tab
                         className='w-full h-full '
                         key="img_layout"
@@ -87,17 +88,18 @@ const BIllBoard = () => {
                         I am working on this
                     </Tab>
                     <Tab
+                        className='w-full h-full '
                         key="multi_tabs"
                         title={
                             <div className="flex items-center space-x-2">
                                 {/* <VideoIcon /> */}
-                                <span><img className='w-[4rem]' src={TabsIcon} alt="" /></span>
+                                <span><img className='w-[1.2rem]' src={TabsIcon} alt="" /></span>
                                 <span>Multi Tabs</span>
-                                <span>(10)</span>
-
                             </div>
                         }
-                    />
+                    >
+                        <Multipletabs />
+                    </Tab>
                 </Tabs>
             </div >
         </>
