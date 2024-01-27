@@ -85,6 +85,22 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         {user?._id}
                     </p>
                 );
+            case "mainHeading":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user?.mainHeading}
+                    </p>
+                );
+            case "productsData.length":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user?.productsData.length}
+                    </p>
+                );
 
 
             case "name":
@@ -94,6 +110,22 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     >
                         {user?.name || user?.heading}
                     </p>
+                );
+            // case "overlayImages":
+            //     return (
+            //         <p
+            //             className='font-2 font-medium text-[#000]'
+            //         >
+            //             {user?.overlayImages !== null ? "with overlay 3 image" :" Single Banner"}
+            //         </p>
+            //     );
+            case "bannerImageLink":
+                return (
+                    <p
+                    className='w-[5rem] h-[5rem] font-2 font-medium text-[#000]'
+                >
+                    <img className='w-full h-full rounded-lg object-cover' src={user?.bannerImageLink} alt="" />
+                </p>
                 );
             case "view":
                 return (

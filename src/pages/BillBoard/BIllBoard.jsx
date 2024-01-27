@@ -10,34 +10,22 @@ import LayoutIcon from "../../assets/layout.svg"
 import { Card, Tab, Tabs } from '@nextui-org/react'
 import ImageLayout from '../../components/ImgLayout/ImgLayout'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
+<<<<<<< HEAD
 import Multipletabs from '../../components/MultipleTab/MultipleTabs'
+=======
+import Banner from '../Banner/Banner'
+import CardComponent from '../../components/CardComponent/CardComponent'
+>>>>>>> 099bf56f87d08fe02ac10949683c28a5a23360ed
 
 const BIllBoard = () => {
-    const columns = [
-        { name: "ID", uid: "id", sortable: true },
-        { name: "NAME", uid: "name", },
-        { name: "DATE", uid: "date" },
-        { name: "ACTIONS", uid: "actions" },
-    ];
-
-    const users = [
-        {
-            id: 1,
-            name: "Mens",
-            date: "2023-13-12",
-        },
-        {
-            id: 2,
-            name: "Womens",
-            date: "2021-10-12",
-        },
-    ];
+    
     return (
         <>
             <div className="flex flex-col  items-start  justify-between  border-b mx-4 md:mx-10 pb-3 py-5 ">
                 <Tabs aria-label="Options" className='font-semibold' color="primary" variant="underlined">
                     <Tab
                         key="banner"
+                        className='w-full'
                         title={
                             <div className="flex items-center space-x-2">
                                 {/* <GalleryIcon /> */}
@@ -47,7 +35,7 @@ const BIllBoard = () => {
                             </div>
                         }
                     >
-                        I am working on this
+                        <Banner />
                     </Tab>
                     <Tab key="slider"
                         className='w-full h-full '
@@ -75,6 +63,7 @@ const BIllBoard = () => {
                     </Tab>
                     <Tab
                         key="card"
+                        className='w-full'
                         title={
                             <div className="flex items-center space-x-2">
                                 <span><img className='w-[1.5rem]' src={CardIcon} alt="" /></span>
@@ -85,7 +74,7 @@ const BIllBoard = () => {
                             </div>
                         }
                     >
-                        I am working on this
+                        <CardComponent />
                     </Tab>
                     <Tab
                         className='w-full h-full '
