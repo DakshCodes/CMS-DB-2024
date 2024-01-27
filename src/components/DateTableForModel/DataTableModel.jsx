@@ -85,6 +85,22 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         {user?._id}
                     </p>
                 );
+            case "mainHeading":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user?.mainHeading}
+                    </p>
+                );
+            case "productsData.length":
+                return (
+                    <p
+                        className='font-2 font-medium text-[#000]'
+                    >
+                        {user?.productsData.length}
+                    </p>
+                );
 
 
             case "name":

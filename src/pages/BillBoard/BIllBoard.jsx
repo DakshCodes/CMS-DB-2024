@@ -59,6 +59,7 @@ const BIllBoard = () => {
                     </Tab>
                     <Tab
                         key="card"
+                        className='w-full'
                         title={
                             <div className="flex items-center space-x-2">
                                 <span><img className='w-[1.5rem]' src={CardIcon} alt="" /></span>
