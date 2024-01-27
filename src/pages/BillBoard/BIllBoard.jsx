@@ -8,33 +8,17 @@ import CardIcon from "../../assets/card.svg"
 import TabsIcon from "../../assets/tabs.svg"
 import LayoutIcon from "../../assets/layout.svg"
 import { Tab, Tabs } from '@nextui-org/react'
+import Banner from '../Banner/Banner'
 
 const BIllBoard = () => {
-    const columns = [
-        { name: "ID", uid: "id", sortable: true },
-        { name: "NAME", uid: "name", },
-        { name: "DATE", uid: "date" },
-        { name: "ACTIONS", uid: "actions" },
-    ];
-
-    const users = [
-        {
-            id: 1,
-            name: "Mens",
-            date: "2023-13-12",
-        },
-        {
-            id: 2,
-            name: "Womens",
-            date: "2021-10-12",
-        },
-    ];
+    
     return (
         <>
-            <div className="flex flex-col items-start  justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
+            <div className="flex flex-col items-start justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
                 <Tabs aria-label="Options" className='font-semibold' color="primary" variant="underlined">
                     <Tab
                         key="banner"
+                        className='w-full'
                         title={
                             <div className="flex items-center space-x-2">
                                 {/* <GalleryIcon /> */}
@@ -44,7 +28,7 @@ const BIllBoard = () => {
                             </div>
                         }
                     >
-                        I am working on this
+                        <Banner />
                     </Tab>
                     <Tab
                         key="slider"
