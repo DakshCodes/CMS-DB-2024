@@ -11,6 +11,7 @@ import { Card, Tab, Tabs } from '@nextui-org/react'
 import ImageLayout from '../../components/ImgLayout/ImgLayout'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
 import Banner from '../Banner/Banner'
+import CardComponent from '../../components/CardComponent/CardComponent'
 
 const BIllBoard = () => {
     
@@ -68,7 +69,7 @@ const BIllBoard = () => {
                             </div>
                         }
                     >
-                        I am working on this
+                        <CardComponent />
                     </Tab>
                     <Tab
                         key="multi_tabs"
