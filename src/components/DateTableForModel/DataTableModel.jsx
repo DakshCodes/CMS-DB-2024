@@ -92,15 +92,31 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                     <p
                         className='font-2 font-medium text-[#000]'
                     >
-                        {user?.name}
+                        {user?.name || user?.heading}
+                    </p>
+                );
+            case "bannerImageLink":
+                return (
+                    <p
+                    className='w-[5rem] h-[5rem] font-2 font-medium text-[#000]'
+                >
+                    <img className='w-full h-full rounded-lg object-cover' src={user?.bannerImageLink} alt="" />
+                </p>
+                );
+            case "view":
+                return (
+                    <p
+                        className='font-2 font-medium py-4 flex items-center justify-center text-[#000] max-w-max '
+                    >
+                        {user?.viewall}
                     </p>
                 );
             case "isVisible":
                 return (
                     <p
-                        className='font-2 font-medium py-4 flex items-center justify-center text-[#000]'
+                        className='font-2  max-w-max font-medium py-4 flex items-center justify-center text-[#000]'
                     >
-                        {user?.isVisible ?
+                        {user?.isVisible || user?.visible ?
                             <div className='bg-green-600 py-1 rounded-full text-white px-6 text-center w-fit '>
                                 Visible
                             </div>
@@ -144,7 +160,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
 
             case "createdAt":
                 return (
-                    <div className="font-2 font-medium text-[#000]">
+                    <div className="font-2 font-medium text-[#000] max-w-max ">
                         {moment(user?.createdAt).format("YYYY[/]MM[/]DD [at] LT")}
                     </div>
                 );
@@ -166,7 +182,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                             <DropdownMenu className='font-2 font-medium text-[#000]'>
                                 <DropdownItem aria-label="Edit" onClick={() => update(user._id)}>Edit</DropdownItem>
                                 {
-                                    !(user?.name == "Colors") ? (<DropdownItem aria-label="Delete"  onClick={() => deleteitem(user._id)}>Delete</DropdownItem>) : ("You Can't Delete")
+                                    !(user?.name == "Colors") ? (<DropdownItem aria-label="Delete" onClick={() => deleteitem(user._id)}>Delete</DropdownItem>) : ("You Can't Delete")
                                 }
                             </DropdownMenu>
                         </Dropdown>
@@ -268,7 +284,7 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                             key={column.uid}
                             align={column.uid === "actions" ? "center" : "start"}
                             allowsSorting={column.sortable}
-                            className="font font-medium text-[#000] "
+                            className="font font-medium text-[#000]  max-w-max "
                         >
                             {column.name}
                         </TableColumn>
@@ -278,8 +294,8 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
 
                     emptyContent={"No users found"} items={sortedItems}>
                     {(item, index) => (
-                        <TableRow key={item._id}    >
-                            {(columnKey) => <TableCell >{renderCell(item, columnKey, index)}</TableCell>}
+                        <TableRow key={item._id}  className="w-full"  >
+                            {(columnKey) => <TableCell  >{renderCell(item, columnKey, index)}</TableCell>}
                         </TableRow>
                     )}
                 </TableBody>

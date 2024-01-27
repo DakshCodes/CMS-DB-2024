@@ -7,14 +7,16 @@ import SliderIcon from "../../assets/slider.svg"
 import CardIcon from "../../assets/card.svg"
 import TabsIcon from "../../assets/tabs.svg"
 import LayoutIcon from "../../assets/layout.svg"
-import { Tab, Tabs } from '@nextui-org/react'
+import { Card, Tab, Tabs } from '@nextui-org/react'
+import ImageLayout from '../../components/ImgLayout/ImgLayout'
+import SliderComponent from '../../components/SliderComponent/SliderComponent'
 import Banner from '../Banner/Banner'
 
 const BIllBoard = () => {
     
     return (
         <>
-            <div className="flex flex-col items-start justify-between  border-b mx-4 md:mx-10 pb-3 py-5">
+            <div className="flex flex-col  items-start  justify-between  border-b mx-4 md:mx-10 pb-3 py-5 ">
                 <Tabs aria-label="Options" className='font-semibold' color="primary" variant="underlined">
                     <Tab
                         key="banner"
@@ -30,30 +32,30 @@ const BIllBoard = () => {
                     >
                         <Banner />
                     </Tab>
-                    <Tab
-                        key="slider"
+                    <Tab key="slider"
+                        className='w-full h-full '
                         title={
                             <div className="flex items-center space-x-2">
                                 {/* <MusicIcon /> */}
                                 <span><img className='w-[1.5rem]' src={SliderIcon} alt="" /></span>
                                 <span>Slider</span>
-                                <span>(10)</span>
 
                             </div>
-                        }
-                    />
+                        } >
+                            <SliderComponent />
+                        </Tab>
                     <Tab
+                        className='w-full h-full '
                         key="img_layout"
                         title={
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 ">
                                 {/* <MusicIcon /> */}
                                 <span><img className='w-[1.5rem]' src={LayoutIcon} alt="" /></span>
                                 <span>Image Layout</span>
-                                <span>(10)</span>
-
                             </div>
-                        }
-                    />
+                        }>
+                        <ImageLayout />
+                    </Tab>
                     <Tab
                         key="card"
                         title={
@@ -81,7 +83,6 @@ const BIllBoard = () => {
                         }
                     />
                 </Tabs>
-
             </div >
         </>
     )

@@ -6,14 +6,23 @@ import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 import { CreateBanner } from '../../apicalls/banner'
 
-const BannerForm = ({ isOpen, onOpenChange }) => {
-    const [selectedBannerVersion, setSelectedBannerVersion] = useState(true)
-    const [bannerImage, setBannerImage] = useState('')
-    const [overlayImage, setOverlayImage] = useState('')
-    const [overlayImagesLink, setOverlayImagesLink] = useState([])
-    const [bannerImageLink, setBannerImageLink] = useState('')
-    const [visibility, setVisibility] = useState(true);
-    const [overlayImageVisibility, setOverlayImageVisibility] = useState([true, true, true]); // Initial visibility for 3 overlay images
+const BannerForm = ({ isOpen, onOpenChange ,getData,
+    selectedBannerVersion,
+    bannerImage,
+    overlayImage,
+    overlayImagesLink,
+    bannerImageLink,
+    visibility,
+    overlayImageVisibility,
+    setSelectedBannerVersion,
+    setBannerImage,
+    setOverlayImage,
+    setOverlayImagesLink,
+    setBannerImageLink,
+    setVisibility,
+    setOverlayImageVisibility,
+}) => {
+     // Initial visibility for 3 overlay images
     const dispatch = useDispatch();
 
 
@@ -61,6 +70,7 @@ const BannerForm = ({ isOpen, onOpenChange }) => {
 
             if (response.success) {
                 toast.success(response.message);
+                getData();
                 onOpenChange(false);
             } else {
                 toast.error(response.error);
