@@ -95,6 +95,14 @@ const DataTableModel = ({ data, columnss, update, deleteitem }) => {
                         {user?.name || user?.heading}
                     </p>
                 );
+            // case "overlayImages":
+            //     return (
+            //         <p
+            //             className='font-2 font-medium text-[#000]'
+            //         >
+            //             {user?.overlayImages !== null ? "with overlay 3 image" :" Single Banner"}
+            //         </p>
+            //     );
             case "bannerImageLink":
                 return (
                     <p

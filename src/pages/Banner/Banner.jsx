@@ -4,7 +4,7 @@ import Butoon from '../../components/ui/Butoon'
 import { useDisclosure } from '@nextui-org/react';
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
 import BannerForm from './BannerForm';
-import { DeleteBannerById, GetAllBanners, GetBannerById } from '../../apicalls/banner';
+import { DeleteBannerById, GetAllBanners, GetBannerById, UpdateBannerById } from '../../apicalls/banner';
 import { SetLoader } from '../../redux/loadersSlice';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -17,6 +17,7 @@ const Banner = () => {
 
     const [selectedBannerVersion, setSelectedBannerVersion] = useState(true)
     const [bannerImage, setBannerImage] = useState('')
+    const [bannerID, setBannerID] = useState('')
     const [overlayImage, setOverlayImage] = useState('')
     const [overlayImagesLink, setOverlayImagesLink] = useState([])
     const [bannerImageLink, setBannerImageLink] = useState('')
@@ -27,6 +28,7 @@ const Banner = () => {
 
     const columns = [
         { name: "Banner Image", uid: "bannerImageLink", },
+        // { name: "Banner Version", uid: "overlayImages", },
         { name: "Visibility", uid: "isVisible" },
         { name: "Created At", uid: "createdAt" },
         { name: "ACTIONS", uid: "actions" },
@@ -52,6 +54,36 @@ const Banner = () => {
         }
     };
 
+    const handleUpdateSubmit = async (e) => {
+        // e.preventDefault();
+        try {
+            const bannerData = {
+                bannerImageLink,
+                isVisible: visibility,
+                overlayImages: overlayImagesLink.map((image, index) => ({
+                    imageLink: image,
+                    isVisible: overlayImageVisibility[index]?.isVisible || false,
+                })),
+            };
+
+            dispatch(SetLoader(true));
+            const response = await UpdateBannerById(bannerID, bannerData);
+
+            dispatch(SetLoader(false));
+
+            if (response.success) {
+                toast.success(response.message);
+                getBannerData();
+                onOpenChange(false);
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            console.error("Error updating Layout:", error.message);
+            toast.error(error.message);
+        }
+    };
     const handleUpdate = async (bannerID) => {
         try {
             const response = await GetAllBanners();
@@ -64,14 +96,14 @@ const Banner = () => {
                 console.log(existingTag)
 
                 onOpen();
+                setBannerID(existingTag._id);
                 setVisibility(existingTag?.isVisible);
                 setBannerImageLink(existingTag.bannerImageLink)
                 if (existingTag?.overlayImages) {
-                    setOverlayImagesLink(existingBanner.overlayImages.forEach(overlay => console.log(overlay.imageLink)));
-                    setOverlayImageVisibility(existingBanner.overlayImages.map(overlay => ({
-                        isVisible: overlay.isVisible
-                    })));
+                    setOverlayImagesLink(existingTag.overlayImages.map(overlay => overlay.imageLink));
+                    setOverlayImageVisibility(existingTag.overlayImages.map(overlay => overlay.isVisible));
                 }
+                
 
             } else {
                 throw new Error(response.message);
@@ -118,6 +150,8 @@ const Banner = () => {
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 getData={getBannerData}
+                bannerID = {bannerID}
+                handleUpdateSubmit={handleUpdateSubmit}
 
                 selectedBannerVersion={selectedBannerVersion}
                 bannerImage={bannerImage}

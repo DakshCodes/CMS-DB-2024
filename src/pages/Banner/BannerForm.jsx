@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 import { CreateBanner } from '../../apicalls/banner'
 
-const BannerForm = ({ isOpen, onOpenChange ,getData,
+const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmit,
     selectedBannerVersion,
     bannerImage,
     overlayImage,
@@ -293,8 +293,8 @@ const BannerForm = ({ isOpen, onOpenChange ,getData,
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>
-                                <Button className='bg-[#000] text-[#fff]' onPress={(e)=>handleSubmit(e)}>
-                                    Submit
+                                <Button className='bg-[#000] text-[#fff]' onPress={bannerID ? handleUpdateSubmit : handleSubmit}>
+                                    {bannerID ?"Update" :"Create"}
                                 </Button>
                             </ModalFooter>
                         </>
