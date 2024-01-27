@@ -245,6 +245,11 @@ const CardComponent = () => {
             if (hasEmptyProduct) {
                 throw new Error('Please select a product for each component.');
             }
+            
+            if(components.length < 5){
+                throw new Error('Please add minimum five items');
+                return;
+            }
 
             const payload = {
                 mainHeading: mainTitle, // Add your main title
