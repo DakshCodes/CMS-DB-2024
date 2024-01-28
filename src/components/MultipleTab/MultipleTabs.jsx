@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Card, Checkbox } from "@nextui-org/react";
+import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Card, Checkbox, Select, SelectItem, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import toast from 'react-hot-toast';
@@ -7,8 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { SetLoader } from "../../redux/loadersSlice";
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
-import { GetlayoutimgData, Createlayoutimg, Updatelayoutimg, Deletelayoutimg } from '../../apicalls/layoutimages';
+import { GetmultitabsData,Createmultitabs,Updatemultitabs,Deletemultitabs} from '../../apicalls/multipletabs';
 import { UploadImage } from '../../apicalls/user';
+import { GetProductsData } from '../../apicalls/product';
+import { GetslidercomData } from '../../apicalls/slidercomponent';
 
 const Multipletabs = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -19,6 +21,28 @@ const Multipletabs = () => {
     const [layoutid, setlayoutid] = useState("");
     const [selectedImage, setSelectedImage] = useState('');
     const [isSelected, setIsSelected] = useState(false);
+    const [sliderData, setSliderData] = useState([]);
+    const [cardselected, setCardSelected] = useState(false);
+    const [refcomponent, setrefcomponent] = useState("");
+    const [tabname, settabname] = useState("");
+
+
+    const getSliderData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetslidercomData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setSliderData(response.slidercom);
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message)
+        }
+    }
+
 
     const [layout, setLayout] = useState({
         name: "",
@@ -35,10 +59,10 @@ const Multipletabs = () => {
     const getLayoutData = async () => {
         try {
             dispatch(SetLoader(true));
-            const response = await GetlayoutimgData();
+            const response = await GetmultitabsData();
             dispatch(SetLoader(false));
             if (response.success) {
-                setTabsData(response.layoutimg);
+                setTabsData(response.multitabs);
             } else {
                 throw new Error(response.message);
             }
@@ -50,23 +74,25 @@ const Multipletabs = () => {
 
     useEffect(() => {
         getLayoutData();
+        getSliderData();
     }, []);
 
     const isAttributeNameUnique = (name) => {
-        const lowerCaseName = name.toLowerCase();
-        return !TabsData.some((attribute) => attribute.name.toLowerCase() === lowerCaseName);
+        const lowerCaseName = tabname.toLowerCase();
+        return !TabsData?.some((attribute) => attribute?.name?.toLowerCase() === lowerCaseName);
     };
 
     const handleCloseModal = () => {
         setSelectedImage("");
         setLayout(null)
         setIsSelected(false)
+        setCardSelected(false)
     };
 
     const handleDelete = async (categoryId) => {
         try {
             dispatch(SetLoader(true));
-            const response = await Deletelayoutimg(categoryId);
+            const response = await Deletemultitabs(categoryId);
             dispatch(SetLoader(false));
             if (response.success) {
                 toast.success(response.message);
@@ -83,15 +109,16 @@ const Multipletabs = () => {
 
     const handleUpdate = async (categoryId) => {
         try {
-            const response = await GetlayoutimgData();
+            const response = await GetmultitabsData();
             if (response.success) {
-                const existingTag = response.layoutimg.find((cat) => cat._id === categoryId);
+                const existingTag = response.multitabs.find((cat) => cat._id === categoryId);
                 if (!existingTag) {
-                    throw new Error("Category not found");
+                    throw new Error("Tab not found");
                 }
 
                 onOpen();
-                setLayout({ ...layout, name: existingTag.name, Images: existingTag.Images, visible: existingTag.visible });
+                console.log(existingTag,"exist")
+                setLayout({ ...layout, name: existingTag.name, Tabs: existingTag.Tabs, visible: existingTag.visible });
                 setIsSelected(existingTag?.visible)
                 setlayoutid(categoryId)
             } else {
@@ -112,14 +139,14 @@ const Multipletabs = () => {
             layout.visible = isSelected;
 
             dispatch(SetLoader(true));
-            const response = await Updatelayoutimg(layoutid, layout);
+            const response = await Updatemultitabs(layoutid, layout);
 
             dispatch(SetLoader(false));
 
             if (response.success) {
                 toast.success(response.message);
                 setTabsData((prevData) =>
-                    prevData.map((category) =>
+                    prevData?.map((category) =>
                         category._id === layoutid
                             ? { ...category, name: layout.name, Images: layout.Images, visible: layout.visible }
                             : category
@@ -140,24 +167,20 @@ const Multipletabs = () => {
         e.preventDefault();
         try {
             if (!isAttributeNameUnique(layout.name)) {
-                toast.error("Tag name must be unique.");
+                toast.error("Layput name must be unique.");
                 return;
             }
-            if (!(layout?.Images?.length >= 5)) {
-                true
-                toast.error("Images must be 5.");
-                return;
-            }
+
             layout.visible = isSelected;
             dispatch(SetLoader(true));
-            const response = await Createlayoutimg(layout);
+            const response = await Createmultitabs(layout);
 
             dispatch(SetLoader(false));
 
             if (response.success) {
                 toast.success(response.message)
-                setTabsData(prevData => [...prevData, { _id: response.layoutimgDoc._id, name: response.layoutimgDoc.name, Images: response.layoutimgDoc.Images, createdAt: response.layoutimgDoc.createdAt, visible: response.layoutimgDoc.visible, actions: "" }]);
-                setLayout({ name: "", Images: [] });
+                setTabsData(prevData => [...prevData, { _id: response.multitabsDoc._id, name: response.multitabsDoc.name, Tabs: response.multitabsDoc.Tabs, createdAt: response.multitabsDoc.createdAt, visible: response.multitabsDoc.visible, actions: "" }]);
+                setLayout({});
             } else {
                 throw new Error(response.message);
             }
@@ -169,41 +192,35 @@ const Multipletabs = () => {
     };
 
     const handleAddValue = (e) => {
-        setSelectedImage(value);
-    };
-
-    const uploadImage = async (e) => {
-        e.preventDefault();
-        try {
-            if (!selectedImage) {
-                toast.error('Please Add Image ?');
-                return false;
-            }
-
-            const formData = new FormData();
-            formData.append('product_images', selectedImage);
-
-            setloading(true)
-            const response = await UploadImage(formData);
-            setloading(false)
-
-            if (response.success) {
-                const newImageLink = response.url;
-                if (layout && Array.isArray(layout.Images)) {
-                    setLayout({ ...layout, Images: [...layout.Images, { src: newImageLink }] });
-                } else {
-                    toast.error("layout is undefined or layout.Images is not an array:", layout);
-                }
-                setSelectedImage("");
-                toast.success(response.message);
-            } else {
-                console.log(response.message);
-            }
-        } catch (error) {
-            setloading(false)
-            console.log(error.message);
+        if (!tabname) {
+            toast.error("Tab name Required.");
+            return;
         }
+        if (!refcomponent) {
+            toast.error("Component Ref Required.");
+            return;
+        }
+
+        if (layout && Array.isArray(layout?.Tabs)) {
+            setLayout({ ...layout, Tabs: [...layout?.Tabs, { tabname: tabname, component: refcomponent, active: cardselected }] });
+        } else {
+            toast.error("layout is undefined or layout.Tabs is not an array:", layout);
+        }
+        settabname("")
+        setrefcomponent("")
+        cardselected(false)
     };
+    const handleDeleteValue = (index) => {
+        // Create a copy of the Images array
+        const UpadatedTabs = [...layout?.Tabs];
+        // Remove the image at the specified index
+        UpadatedTabs.splice(index, 1);
+        // Update the state with the modified Images array
+        setLayout({ ...layout, Tabs: UpadatedTabs });
+    };
+
+
+    console.log(layout, "layout")
 
     return (
         <div className='w-full h-full flex justify-between flex-col'>
@@ -216,7 +233,7 @@ const Multipletabs = () => {
                         handleCloseModal();
                     }
                 }}
-                size="xl"
+                size="2xl"
             >
                 <ModalContent>
                     {(onClose) => (
@@ -243,21 +260,61 @@ const Multipletabs = () => {
                                 </div>
                                 <div className="img-form flex flex-col gap-5">
                                     <h1 className='font font-[600]'>Add Tabs (maximum 3)</h1>
-                                    <div className='flex gap-5 justify-start' >
-                                        <div className="flex flex-row">
+                                    <div className='flex gap-5 justify-start gap-5' >
+                                        <div className="flex flex-row items-center justify-between  w-full">
                                             <Input
+                                                isDisabled={layout?.Tabs?.length >= 3}
                                                 type="text"
-                                                placeholder="Value"
+                                                placeholder="Tab Name"
                                                 labelPlacement="outside"
+                                                className='max-w-[13rem]'
                                                 classNames={{
                                                     label: "font-bold font-3",
-                                                    input: "font-semibold font",
+                                                    input: "font-semibold font ",
                                                 }}
-                                            // value={currentValue}
-                                            // onChange={(e) => setCurrentValue(e.target.value)}
+                                                value={tabname}
+                                                onChange={(e) => settabname(e.target.value)}
                                             />
+                                            <Select
+                                                isDisabled={layout?.Tabs?.length >= 3}
+                                                placeholder="Select Component"
+                                                className="max-w-[12rem] font-[800] font-sans"
+                                                size='sm'
+                                                variant='flat'
+                                                onChange={(e) => setrefcomponent(e.target.value)}
+                                                disableSelectorIconRotation
+                                                selectorIcon={
+                                                    <svg
+                                                        aria-hidden="true"
+                                                        fill="none"
+                                                        focusable="false"
+                                                        height="1em"
+                                                        role="presentation"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="1.5"
+                                                        viewBox="0 0 24 24"
+                                                        width="1em"
+                                                    >
+                                                        <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                                                        <path d="M8 9l4 -4l4 4" />
+                                                        <path d="M16 15l-4 4l-4 -4" />
+                                                    </svg>
+                                                }
+                                            >
+                                                {sliderData?.map((animal) => (
+                                                    <SelectItem className='font-[900] font-sans' key={animal?._id} value={animal?.heading}>
+                                                        {animal?.heading}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Checkbox isDisabled={layout?.Tabs?.length >= 3} className='font-sans font-[600]' color='primary' isSelected={cardselected} onValueChange={setCardSelected}>
+                                                Active
+                                            </Checkbox>
                                             <Button isIconOnly color="warning" variant="light"
                                                 onClick={handleAddValue}
+                                                isDisabled={layout?.Tabs?.length >= 3}
                                             >
                                                 <svg className="w-8 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <g id="SVGRepo_bgCarrier" strokeWidth={0} />
@@ -271,7 +328,7 @@ const Multipletabs = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* <Table
+                                <Table
                                     classNames={{
                                         base: "max-h-[120px] overflow-scroll",
                                         table: "min-h-[70px]",
@@ -283,13 +340,17 @@ const Multipletabs = () => {
                                     aria-label="Attribute Values Table"
                                 >
                                     <TableHeader>
-                                        <TableColumn>VALUE</TableColumn>
+                                        <TableColumn>NAME</TableColumn>
+                                        <TableColumn>Active</TableColumn>
+                                        <TableColumn>Ref</TableColumn>
                                         <TableColumn>ACTION</TableColumn>
                                     </TableHeader>
                                     <TableBody>
-                                        {attributeValuesTable.map((value, index) => (
+                                        {layout?.Tabs?.map((value, index) => (
                                             <TableRow key={index}>
-                                                <TableCell>{value}</TableCell>
+                                                <TableCell>{value.tabname}</TableCell>
+                                                <TableCell>{value.active ? "Active" : "Inactive"}</TableCell>
+                                                <TableCell>{value.component}</TableCell>
                                                 <TableCell>
                                                     <span
                                                         className="text-lg text-danger cursor-pointer active:opacity-50 flex justify-center items-center"
@@ -345,7 +406,7 @@ const Multipletabs = () => {
                                             </TableRow>
                                         ))}
                                     </TableBody>
-                                </Table> */}
+                                </Table>
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onClose}>
@@ -361,7 +422,7 @@ const Multipletabs = () => {
             </Modal>
             <div className='w-full h-max flex'>
                 <div className="flex-1 ">
-                    <Heading title={`Multitabs (${TabsData.length})`} description="Manage Tabs for your Frontend" />
+                    <Heading title={`Multitabs (${TabsData?.length})`} description="Manage Tabs for your Frontend" />
                 </div>
                 <Butoon onOpen={onOpen} title={"Add New"} />
             </div>

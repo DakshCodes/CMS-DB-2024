@@ -10,12 +10,9 @@ import LayoutIcon from "../../assets/layout.svg"
 import { Card, Tab, Tabs } from '@nextui-org/react'
 import ImageLayout from '../../components/ImgLayout/ImgLayout'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
-<<<<<<< HEAD
 import Multipletabs from '../../components/MultipleTab/MultipleTabs'
-=======
 import Banner from '../Banner/Banner'
 import CardComponent from '../../components/CardComponent/CardComponent'
->>>>>>> 099bf56f87d08fe02ac10949683c28a5a23360ed
 
 const BIllBoard = () => {
     
