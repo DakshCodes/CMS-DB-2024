@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Card, Checkbox, Select, SelectItem, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
+import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Card, Checkbox, Select, SelectItem, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Autocomplete, AutocompleteItem } from "@nextui-org/react";
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import toast from 'react-hot-toast';
@@ -7,10 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { SetLoader } from "../../redux/loadersSlice";
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
-import { GetmultitabsData,Createmultitabs,Updatemultitabs,Deletemultitabs} from '../../apicalls/multipletabs';
+import { GetmultitabsData, Createmultitabs, Updatemultitabs, Deletemultitabs } from '../../apicalls/multipletabs';
 import { UploadImage } from '../../apicalls/user';
 import { GetProductsData } from '../../apicalls/product';
 import { GetslidercomData } from '../../apicalls/slidercomponent';
+import { GetAllBanners } from '../../apicalls/banner';
+import { getAllCards } from '../../apicalls/card';
+import { GetlayoutimgData } from '../../apicalls/layoutimages';
 
 const Multipletabs = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -21,27 +24,77 @@ const Multipletabs = () => {
     const [layoutid, setlayoutid] = useState("");
     const [selectedImage, setSelectedImage] = useState('');
     const [isSelected, setIsSelected] = useState(false);
-    const [sliderData, setSliderData] = useState([]);
     const [cardselected, setCardSelected] = useState(false);
     const [refcomponent, setrefcomponent] = useState("");
     const [tabname, settabname] = useState("");
+    // Define separate state variables for each type of data
+    const [sliderData, setSliderData] = useState([]);
+    const [layoutData, setLayoutData] = useState([]);
+    const [cardsData, setCardsData] = useState([]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                dispatch(SetLoader(true));
 
-    const getSliderData = async () => {
+                // Fetch data for sliders
+                const sliderResponse = await GetslidercomData();
+                if (sliderResponse.success) {
+                    setSliderData(sliderResponse.slidercom);
+                } else {
+                    throw new Error(sliderResponse.message);
+                }
+
+                // Fetch data for layouts
+                const layoutResponse = await GetlayoutimgData();
+                if (layoutResponse.success) {
+                    setLayoutData(layoutResponse.layoutimg);
+                } else {
+                    throw new Error(layoutResponse.message);
+                }
+
+                // Fetch data for cards
+                const cardsResponse = await getAllCards();
+                if (cardsResponse.success) {
+                    setCardsData(cardsResponse.cards);
+                } else {
+                    throw new Error(cardsResponse.error);
+                }
+
+                dispatch(SetLoader(false));
+            } catch (error) {
+                dispatch(SetLoader(false));
+                console.error("Error fetching data:", error);
+                toast.error(error.message);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Combine all data when needed
+    const componentsdata = [...sliderData, ...layoutData, ...cardsData];
+
+    console.log(componentsdata, "layout");
+    const getMultitabs = async () => {
         try {
             dispatch(SetLoader(true));
-            const response = await GetslidercomData();
+            const response = await GetmultitabsData();
             dispatch(SetLoader(false));
             if (response.success) {
-                setSliderData(response.slidercom);
+                setTabsData(response.multitabs);
             } else {
                 throw new Error(response.message);
             }
         } catch (error) {
             dispatch(SetLoader(false));
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
+    };
+    useEffect(() => {
+        getMultitabs();
+    }, []);
+
 
 
     const [layout, setLayout] = useState({
@@ -56,26 +109,7 @@ const Multipletabs = () => {
         { name: "ACTIONS", uid: "actions" },
     ];
 
-    const getLayoutData = async () => {
-        try {
-            dispatch(SetLoader(true));
-            const response = await GetmultitabsData();
-            dispatch(SetLoader(false));
-            if (response.success) {
-                setTabsData(response.multitabs);
-            } else {
-                throw new Error(response.message);
-            }
-        } catch (error) {
-            dispatch(SetLoader(false));
-            toast.error(error.message)
-        }
-    }
 
-    useEffect(() => {
-        getLayoutData();
-        getSliderData();
-    }, []);
 
     const isAttributeNameUnique = (name) => {
         const lowerCaseName = tabname.toLowerCase();
@@ -117,7 +151,7 @@ const Multipletabs = () => {
                 }
 
                 onOpen();
-                console.log(existingTag,"exist")
+                console.log(existingTag, "exist")
                 setLayout({ ...layout, name: existingTag.name, Tabs: existingTag.Tabs, visible: existingTag.visible });
                 setIsSelected(existingTag?.visible)
                 setlayoutid(categoryId)
@@ -170,8 +204,12 @@ const Multipletabs = () => {
                 toast.error("Layput name must be unique.");
                 return;
             }
-
             layout.visible = isSelected;
+            layout.Tabs.forEach(tab => {
+                if (!tab?.active) {
+                    layout.visible = false;
+                }
+            })
             dispatch(SetLoader(true));
             const response = await Createmultitabs(layout);
 
@@ -275,14 +313,14 @@ const Multipletabs = () => {
                                                 value={tabname}
                                                 onChange={(e) => settabname(e.target.value)}
                                             />
-                                            <Select
-                                                isDisabled={layout?.Tabs?.length >= 3}
-                                                placeholder="Select Component"
-                                                className="max-w-[12rem] font-[800] font-sans"
-                                                size='sm'
-                                                variant='flat'
-                                                onChange={(e) => setrefcomponent(e.target.value)}
+                                            <Autocomplete
+                                                placeholder="Link Component"
+                                                defaultItems={componentsdata}
+                                                labelPlacement="outside"
+                                                className="max-w-[14rem] font-[800] font-sans"
+                                                size='md'
                                                 disableSelectorIconRotation
+                                                onSelectionChange={(e) => setrefcomponent(e)}
                                                 selectorIcon={
                                                     <svg
                                                         aria-hidden="true"
@@ -303,12 +341,8 @@ const Multipletabs = () => {
                                                     </svg>
                                                 }
                                             >
-                                                {sliderData?.map((animal) => (
-                                                    <SelectItem className='font-[900] font-sans' key={animal?._id} value={animal?.heading}>
-                                                        {animal?.heading}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
+                                                {(item) => <AutocompleteItem key={item._id}>{item?.heading && "Slider->" + item?.heading || item?.mainHeading && "Cards->" + item?.mainHeading || item?.name && "Layout->" + item?.name}</AutocompleteItem>}
+                                            </Autocomplete>
                                             <Checkbox isDisabled={layout?.Tabs?.length >= 3} className='font-sans font-[600]' color='primary' isSelected={cardselected} onValueChange={setCardSelected}>
                                                 Active
                                             </Checkbox>

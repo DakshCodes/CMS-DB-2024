@@ -149,7 +149,9 @@ const ImageLayout = () => {
                 toast.error("Images must be 5.");
                 return;
             }
+
             layout.visible = isSelected;
+
             dispatch(SetLoader(true));
             const response = await Createlayoutimg(layout);
 

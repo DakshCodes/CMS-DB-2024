@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Card, Checkbox, Tabs, Tab, CardBody, Link, Select, SelectItem, TableHeader, Table, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
+import { Input, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Card, Checkbox, Tabs, Tab, CardBody, Link, Select, SelectItem, TableHeader, Table, TableColumn, TableBody, TableRow, TableCell, Autocomplete, AutocompleteItem } from "@nextui-org/react";
 import Butoon from '../../components/ui/Butoon'
 import Heading from '../../components/ui/Heading'
 import toast from 'react-hot-toast';
@@ -24,7 +24,7 @@ const SliderComponent = () => {
     const [isSelected, setIsSelected] = useState(false);
     const [selected, setSelected] = useState("");
     const [cardselected, setCardSelected] = useState("");
-    const [cardlink, setCardlink] = useState(false);
+    const [cardlink, setCardlink] = useState(null);
     const [ImgTitle, setImgTitle] = useState("")
     const [productsData, setProductsData] = useState([]);
 
@@ -194,6 +194,11 @@ const SliderComponent = () => {
 
 
             slider.visible = isSelected;
+            layout?.Images.forEach(tab => {
+                if (!tab?.active) {
+                    layout.visible = false;
+                }
+            })
 
             dispatch(SetLoader(true));
             const response = await Createslidercom(slider);
@@ -280,8 +285,8 @@ const SliderComponent = () => {
         setSlider({ ...slider, Images: updatedImages });
     };
 
-    console.log(slider, "slider")
-    // console.log(productsData, "Data")
+    // console.log(slider, "Data")
+    console.log(productsData, "Data")
 
 
     return (
@@ -382,13 +387,14 @@ const SliderComponent = () => {
                                                                 className='text-center px-4 rounded-lg border-black h-full hidden'
                                                                 name="product_images"
                                                             />
-                                                            <Select
-                                                                placeholder="Select Link Of Cat."
+                                                            <Autocomplete
+                                                                placeholder="Link Category"
+                                                                defaultItems={categoriesData}
+                                                                labelPlacement="outside"
                                                                 className="max-w-[12rem] font-[800] font-sans"
-                                                                size='sm'
-                                                                variant='flat'
-                                                                onChange={(e) => setCardlink(e.target.value)}
+                                                                size='md'
                                                                 disableSelectorIconRotation
+                                                                onSelectionChange={(e) => setCardlink(e)}
                                                                 selectorIcon={
                                                                     <svg
                                                                         aria-hidden="true"
@@ -409,12 +415,8 @@ const SliderComponent = () => {
                                                                     </svg>
                                                                 }
                                                             >
-                                                                {categoriesData.map((animal) => (
-                                                                    <SelectItem className='font-[900] font-sans' key={animal.name} value={animal.name}>
-                                                                        {animal.name}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </Select>
+                                                                {(item) => <AutocompleteItem key={item._id}>{item?.parentCategory?.name ? item?.parentCategory?.name + "->" + item?.name : item?.name}</AutocompleteItem>}
+                                                            </Autocomplete>
                                                             <Checkbox className='mt-3 mx-2 font-sans font-[600]' color='primary' isSelected={cardselected} onValueChange={setCardSelected}>
                                                                 Visible
                                                             </Checkbox>
@@ -573,13 +575,14 @@ const SliderComponent = () => {
                                                                 className='text-center px-4 rounded-lg border-black h-full hidden'
                                                                 name="product_images"
                                                             />
-                                                            <Select
-                                                                placeholder="Select Link Of Prod."
+                                                            <Autocomplete
+                                                                placeholder="Link Product"
+                                                                defaultItems={productsData}
+                                                                labelPlacement="outside"
                                                                 className="max-w-[12rem] font-[800] font-sans"
-                                                                size='sm'
-                                                                variant='flat'
-                                                                onChange={(e) => setCardlink(e.target.value)}
+                                                                size='md'
                                                                 disableSelectorIconRotation
+                                                                onSelectionChange={(e) => setCardlink(e)}
                                                                 selectorIcon={
                                                                     <svg
                                                                         aria-hidden="true"
@@ -600,12 +603,8 @@ const SliderComponent = () => {
                                                                     </svg>
                                                                 }
                                                             >
-                                                                {productsData.map((animal) => (
-                                                                    <SelectItem className='font-[900] font-sans' key={animal._id} value={animal.productName}>
-                                                                        {animal.productName}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </Select>
+                                                                {(item) => <AutocompleteItem key={item._id}>{item?.main_category + "->" + item?.productName}</AutocompleteItem>}
+                                                            </Autocomplete>
                                                             <Checkbox className='mt-3 mx-2 font-sans font-[600]' color='primary' isSelected={cardselected} onValueChange={setCardSelected}>
                                                                 Visible
                                                             </Checkbox>
@@ -720,10 +719,12 @@ const SliderComponent = () => {
                 </div>
                 <Butoon onOpen={onOpen} title={"Add New"} />
             </div>
-            {Array.isArray(sliderData) && (
-                <DataTableModel data={sliderData} setdata={setSliderData} columnss={columns} deleteitem={handleDelete} update={handleUpdate} />
-            )}
-        </div>
+            {
+                Array.isArray(sliderData) && (
+                    <DataTableModel data={sliderData} setdata={setSliderData} columnss={columns} deleteitem={handleDelete} update={handleUpdate} />
+                )
+            }
+        </div >
     )
 }
 
