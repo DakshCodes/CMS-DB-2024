@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Heading from '../../components/ui/Heading'
 import Butoon from '../../components/ui/Butoon'
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip, useDisclosure } from '@nextui-org/react';
+import { Autocomplete, AutocompleteItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Switch, Tooltip, useDisclosure } from '@nextui-org/react';
 import DataTableModel from '../../components/DateTableForModel/DataTableModel';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -13,13 +13,22 @@ const CardComponent = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const [visibility, setVisibility] = useState(true);
-    const [productsData, setProductsData] = useState([]);
+    const [mainProductsData, setMainProductsData] = useState([]);
     const [components, setComponents] = useState(Array.from({ length: 5 }, () => ({ selectedProduct: '', isVisible: true }))); // New state to manage selected components
     const [mainTitle, setMainTitle] = useState('')
     const [cardsData, setCardsData] = useState('')
+    const [disabledItems, setDisabledItems] = useState([])
     const [cardId, setCardId] = useState('')
 
-
+    
+    useEffect(() => {
+        // Update disabledItems whenever there is a change in the selectedProduct of any index in components
+        const updatedDisabledItems = components
+          .filter((component) => component.selectedProduct !== '') // Exclude components with empty selectedProduct
+          .map((component) => component.selectedProduct);
+    
+        setDisabledItems(updatedDisabledItems);
+      }, [components]);
 
     const dispatch = useDispatch();
 
@@ -39,7 +48,7 @@ const CardComponent = () => {
             dispatch(SetLoader(false));
             console.log(response)
             if (response.success) {
-                setProductsData(response.products);
+                setMainProductsData(response.products);
             } else {
                 throw new Error(response.error);
             }
@@ -93,6 +102,17 @@ const CardComponent = () => {
                 onOpenChange(false);
                 return;
             }
+
+             // Check if each component has a selected product
+             const hasEmptyProduct = components.some(component => !component.selectedProduct);
+             if (hasEmptyProduct) {
+                 throw new Error('Please select a product for each component.');
+             }
+ 
+             if (components.length < 5) {
+                 throw new Error('Please add minimum five items');
+                 return;
+             }
 
             const payload = {
                 mainHeading: mainTitle,
@@ -161,6 +181,7 @@ const CardComponent = () => {
     };
 
     const handleSelectChange = (index, value) => {
+        console.log(index , value)
         setComponents(prev => {
             const updatedComponents = [...prev];
             updatedComponents[index].selectedProduct = value;
@@ -245,8 +266,8 @@ const CardComponent = () => {
             if (hasEmptyProduct) {
                 throw new Error('Please select a product for each component.');
             }
-            
-            if(components.length < 5){
+
+            if (components.length < 5) {
                 throw new Error('Please add minimum five items');
                 return;
             }
@@ -338,7 +359,7 @@ const CardComponent = () => {
                                     </div>
                                     {components.map((component, index) => (
                                         <div className='flex items-center gap-4 mt-4' key={index}>
-                                            <select
+                                            {/* <select
                                                 className='border-2 h-fit border-gray-300 w-full p-2'
                                                 value={component.selectedProduct}
                                                 onChange={(e) => handleSelectChange(index, e.target.value)}
@@ -349,7 +370,40 @@ const CardComponent = () => {
                                                         {item.productName}
                                                     </option>
                                                 ))}
-                                            </select>
+                                            </select> */}
+
+                                            <Autocomplete
+                                                placeholder="Link Product"
+                                                defaultItems={mainProductsData}
+                                                labelPlacement="outside"
+                                                selectedKey={components[index].selectedProduct}
+                                                disabledKeys={disabledItems}
+                                                className="w-full font-[800] font-sans"
+                                                size='md'
+                                                disableSelectorIconRotation
+                                                onSelectionChange={(selectProduct) => handleSelectChange(index, selectProduct)}
+                                                selectorIcon={
+                                                    <svg
+                                                        aria-hidden="true"
+                                                        fill="none"
+                                                        focusable="false"
+                                                        height="1em"
+                                                        role="presentation"
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="1.5"
+                                                        viewBox="0 0 24 24"
+                                                        width="1em"
+                                                    >
+                                                        <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                                                        <path d="M8 9l4 -4l4 4" />
+                                                        <path d="M16 15l-4 4l-4 -4" />
+                                                    </svg>
+                                                }
+                                            >
+                                                {(item) => <AutocompleteItem key={item._id}>{item?.main_category + "->" + item?.productName}</AutocompleteItem>}
+                                            </Autocomplete>
 
                                             <div className="mb-4 border-black mt-6 gap-4 flex items-center">
                                                 <Tooltip showArrow={true} color='secondary' placement="bottom-start" content="Do you want to make this card component visible in the main website?">
