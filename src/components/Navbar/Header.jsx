@@ -66,6 +66,11 @@ const Header = () => {
             label: 'Settings',
             active: pathname.includes('settings'),
         },
+        {
+            href: `/layout`,
+            label: 'Layout',
+            active: pathname.includes('layout'),
+        },
     ]
     return (
         <>

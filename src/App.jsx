@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
 import Attributes from './pages/Attributes/Attributes';
 import Tags from './pages/Tags/Tags';
 import ItemHighlight from './pages/ProductHighlight/ItemHighlight';
+import LayoutSequence from './pages/LayoutSequence/LayoutSequence';
 
 const routesConfig = [
   // { path: '/login', element: <LoginPage /> },
@@ -69,6 +70,10 @@ const routesConfig = [
   {
     path: '/settings',
     element: <Setting />,
+  },
+  {
+    path: '/layout',
+    element: <LayoutSequence />,
   },
 ];
 
