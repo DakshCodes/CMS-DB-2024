@@ -12,49 +12,20 @@ import { SetLoader } from "../../redux/loadersSlice";
 import { GetslidercomData } from "../../apicalls/slidercomponent";
 import { GetlayoutimgData } from "../../apicalls/layoutimages";
 import { getAllCards } from "../../apicalls/card";
+import { Createfrontlayout, GetfrontlayoutData, Updatefrontlayout } from "../../apicalls/frontlayout";
+import toast from "react-hot-toast";
+import { GetmultitabsData } from "../../apicalls/multipletabs";
 
-const sampleTodos = [
-    {
-        id: uuidv4(),
-        title: "banner-1",
-        sortIndex: 0,
-    },
-    {
-        id: uuidv4(),
-        title: "banner-2",
-        sortIndex: 1,
-    },
-    {
-        id: uuidv4(),
-        title: "slide-1",
-        sortIndex: 2,
-    },
-    {
-        id: uuidv4(),
-        title: "slider-2",
-        sortIndex: 3,
-    },
-    {
-        id: uuidv4(),
-        title: "card-1",
-        sortIndex: 4,
-    },
-    {
-        id: uuidv4(),
-        title: "image-1",
-        sortIndex: 5,
-    },
-];
 
 function LayoutSequence() {
     const dispatch = useDispatch();
     const [sliderData, setSliderData] = useState([]);
     const [layoutData, setLayoutData] = useState([]);
     const [cardsData, setCardsData] = useState([]);
+    const [TabsData, setTabsData] = useState([]);
     const [LayoutSequence, setLayoutSequence] = useState([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
-
 
 
     useEffect(() => {
@@ -82,6 +53,26 @@ function LayoutSequence() {
                 } else {
                     throw new Error(cardsResponse.error);
                 }
+                const multitabsres = await GetmultitabsData();
+                if (multitabsres.success) {
+                    setCardsData(multitabsres.multitabs);
+                } else {
+                    throw new Error(multitabsres.error);
+                }
+
+                const frontLayoutResponse = await GetfrontlayoutData();
+                if (frontLayoutResponse.success) {
+                    // Update the state with front layout data
+
+                    console.log(frontLayoutResponse.frontlayout[0], "res")
+                    const frontLayoutData = frontLayoutResponse.frontlayout[0];
+                    if (frontLayoutData?.Layout?.length > 0) {
+                        setSelectedKeys(new Set(frontLayoutData.Layout.map(item => item.id)));
+                        setLayoutSequence(frontLayoutData); // You may need to adjust this based on your backend response structure
+                    }
+                } else {
+                    throw new Error(frontLayoutResponse.message);
+                }
 
                 dispatch(SetLoader(false));
             } catch (error) {
@@ -95,8 +86,7 @@ function LayoutSequence() {
     }, [dispatch]);
 
     // Combine all data when needed
-    const componentsdata = [...sliderData, ...layoutData, ...cardsData];
-
+    const componentsdata = [...sliderData, ...layoutData, ...cardsData, ...TabsData];
 
 
 
@@ -122,6 +112,43 @@ function LayoutSequence() {
         selectedValuesArray.length = 0;
         Array.prototype.push.apply(selectedValuesArray, tempTodos.map((todo, index) => ({ ...todo, sortIndex: index })));
     };
+
+
+    const SubmitLayout = async (e) => {
+        e.preventDefault();
+        try {
+            dispatch(SetLoader(true));
+
+            // Check if LayoutSequence has data
+            if (LayoutSequence && LayoutSequence._id) {
+                // If data exists, update the existing layout
+                const response = await Updatefrontlayout(LayoutSequence._id, selectedValuesArray);
+                if (response.success) {
+                    toast.success(response.message);
+                    console.log(response.frontlayoutDoc, "Updated data");
+                } else {
+                    throw new Error(response.message);
+                }
+            } else {
+                // If no data exists, create a new layout
+                const response = await Createfrontlayout(selectedValuesArray);
+                if (response.success) {
+                    toast.success(response.message);
+                    console.log(response.frontlayoutDoc, "Created data");
+                } else {
+                    throw new Error(response.message);
+                }
+            }
+
+            dispatch(SetLoader(false));
+        } catch (error) {
+            dispatch(SetLoader(false));
+            console.error(error.message);
+            toast.error(error.message);
+        }
+    }
+
+
     console.log(selectedValuesArray, "Data");
 
 
@@ -174,7 +201,7 @@ function LayoutSequence() {
                             <Button onPress={onOpen} color="secondary" className="font-sans font-[600]">Add Components</Button>
                         </div>
                         <div className="bg-[#000] max-w-[90rem] max-h-[38rem] rounded-xl  mx-auto overflow-scroll mt-5" >
-                            <Droppable droppableId="incomplete">
+                            <Droppable droppableId="layout">
                                 {(provided) => (
                                     <div ref={provided.innerRef} {...provided.droppableProps} className="overflow-y-auto   relative border  flex flex-col justify-between gap-5">
                                         {
@@ -215,7 +242,7 @@ function LayoutSequence() {
                                 )}
                             </Droppable>
                         </div>
-                        <Button color="danger" className="" >
+                        <Button color="danger" onClick={SubmitLayout} className="mt-10" >
                             Save Layout
                         </Button>
                     </div>
