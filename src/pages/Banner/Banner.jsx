@@ -23,6 +23,7 @@ const Banner = () => {
     const [bannerImageLink, setBannerImageLink] = useState('')
     const [visibility, setVisibility] = useState(true);
     const [overlayImageVisibility, setOverlayImageVisibility] = useState([true, true, true]);
+    const [name, setName] = useState('');
 
     const dispatch = useDispatch();
 
@@ -58,6 +59,7 @@ const Banner = () => {
         // e.preventDefault();
         try {
             const bannerData = {
+                name,
                 bannerImageLink,
                 isVisible: visibility,
                 overlayImages: overlayImagesLink.map((image, index) => ({
@@ -98,7 +100,8 @@ const Banner = () => {
                 onOpen();
                 setBannerID(existingTag._id);
                 setVisibility(existingTag?.isVisible);
-                setBannerImageLink(existingTag.bannerImageLink)
+                setBannerImageLink(existingTag?.bannerImageLink)
+                setName(existingTag?.name);
                 if (existingTag?.overlayImages) {
                     setOverlayImagesLink(existingTag.overlayImages.map(overlay => overlay.imageLink));
                     setOverlayImageVisibility(existingTag.overlayImages.map(overlay => overlay.isVisible));
@@ -152,6 +155,8 @@ const Banner = () => {
                 getData={getBannerData}
                 bannerID = {bannerID}
                 handleUpdateSubmit={handleUpdateSubmit}
+                name={name}
+                setName={setName}
 
                 selectedBannerVersion={selectedBannerVersion}
                 bannerImage={bannerImage}
