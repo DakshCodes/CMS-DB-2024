@@ -97,9 +97,15 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
         });
     };
 
-    console.log(overlayImageVisibility,"----")
+    const handleOverLayImageDelete = (index) => {
+        setOverlayImagesLink((prevLink) => {
+            return prevLink.filter((_, i) => i !== index);
+        });
+    };
 
-    const handleOverlayImageLinkToChange = (index , id) => {
+    console.log(overlayImageVisibility, "----")
+
+    const handleOverlayImageLinkToChange = (index, id) => {
         setOverlayImageLinkTo((prevLinkTo) => {
             const updatedLinkTo = [...prevLinkTo];
             updatedLinkTo[index] = id;
@@ -124,7 +130,7 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
             overlayImages: overlayImagesLink.map((image, index) => ({
                 imageLink: image,
                 isVisible: overlayImageVisibility[index],
-                linkTo : overlayImageLinkTo[index]
+                linkTo: overlayImageLinkTo[index]
             })),
         };
 
@@ -327,7 +333,7 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
                                             defaultSelected={categoryProductVisibility}
                                             size="lg"
                                             color='secondary'
-                                            onChange={() => {setCategoryProductVisibility(!categoryProductVisibility); setLinkCategoryOrProduct('') ; setOverlayImageLinkTo(['','',''])}}
+                                            onChange={() => { setCategoryProductVisibility(!categoryProductVisibility); setLinkCategoryOrProduct(''); setOverlayImageLinkTo(['', '', '']) }}
                                         >
                                             {categoryProductVisibility ? 'Select Categories' : 'Select Products'}
                                         </Switch>
@@ -415,7 +421,7 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
 
                                     <div className='font-semibold'>Step - 1 <span className='italic text-sm text-gray-600'>(Insert the banner image in this step)</span></div>
 
-                                    <div className='grid grid-cols-5 '>
+                                    <div className='grid grid-cols-6 gap-8'>
                                         <input
                                             type="file"
                                             onChange={(e) => handleBannerImageChange(e)}
@@ -423,27 +429,29 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
                                             id="bannerImageInput"
                                             name="banner_image"
                                         />
-                                        <div className='flex gap-2 col-span-4'>
+                                        <div className='flex gap-2 col-span-5'>
 
                                             <label htmlFor="bannerImageInput" className="font-semibold flex items-center justify-center text-center w-full h-full rounded-lg border border-black cursor-pointer">
-                                                Select Banner Image ({bannerImage.name})
+                                                Select Banner Image ({bannerImage?.name})
                                             </label>
 
                                             {/* {mainImage?.name} */}
                                         </div>
 
-                                        {
-                                            bannerImageLink ?
+                                        <div className='flex gap-2'>
+
+                                            {
+                                                bannerImageLink &&
                                                 <div className='col-span-1 flex items-center justify-center'>
                                                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
                                                         <path fill="#4caf50" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#ccff90" d="M34.602,14.602L21,28.199l-5.602-5.598l-2.797,2.797L21,33.801l16.398-16.402L34.602,14.602z"></path>
                                                     </svg>
                                                 </div>
-                                                :
-                                                <Button isLoading={false} className="font-sans ml-auto col-span-1 text-[#fff] bg-[#000] font-medium" onClick={(e) => uploadImage(e)} >
-                                                    Upload
-                                                </Button>
-                                        }
+                                            }
+                                            <Button isLoading={false} className="font-sans ml-auto col-span-1 text-[#fff] bg-[#000] font-medium" onClick={(e) => uploadImage(e)} >
+                                                Upload
+                                            </Button>
+                                        </div>
                                     </div>
                                     {
                                         bannerImageLink ? <img className='w-[1280px] h-[200px] object-contain' src={bannerImageLink} alt="" /> : <div className='w-full h-[200px] border-2 font-semibold flex items-center justify-center'>Your Banner Image appear here once uploaded</div>
@@ -473,16 +481,16 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
                                                             Select Overlay Image {overlayImagesLink.length + 1} ({overlayImage?.name})
                                                         </label>
                                                     </div>
-                                                    {
-                                                        overlayImagesLink.length === 3 ?
-                                                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
-                                                                <path fill="#4caf50" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#ccff90" d="M34.602,14.602L21,28.199l-5.602-5.598l-2.797,2.797L21,33.801l16.398-16.402L34.602,14.602z"></path>
-                                                            </svg>
-                                                            :
-                                                            <Button isLoading={false} className="font-sans  col-span-1 text-[#fff] bg-[#000] font-medium" onClick={(e) => uploadImage(e)} >
-                                                                Upload
-                                                            </Button>
-                                                    }
+                                                    {/* {
+                                                        overlayImagesLink.length === 3 &&
+                                                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 48 48">
+                                                            <path fill="#4caf50" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#ccff90" d="M34.602,14.602L21,28.199l-5.602-5.598l-2.797,2.797L21,33.801l16.398-16.402L34.602,14.602z"></path>
+                                                        </svg>
+                                                    } */}
+
+                                                    <Button isLoading={false} className="font-sans  col-span-1 text-[#fff] bg-[#000] font-medium" onClick={(e) => uploadImage(e)} >
+                                                        Upload
+                                                    </Button>
 
                                                 </div>
 
@@ -530,7 +538,7 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
                                                                                             size='md'
                                                                                             disableSelectorIconRotation
                                                                                             defaultSelectedKey={overlayImageLinkTo[index]}
-                                                                                            onSelectionChange={(e) => handleOverlayImageLinkToChange(index , e)}
+                                                                                            onSelectionChange={(e) => handleOverlayImageLinkToChange(index, e)}
                                                                                             selectorIcon={
                                                                                                 <svg
                                                                                                     aria-hidden="true"
@@ -568,7 +576,7 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
                                                                                             size='md'
                                                                                             defaultSelectedKey={overlayImageLinkTo[index]}
                                                                                             disableSelectorIconRotation
-                                                                                            onSelectionChange={(e) => handleOverlayImageLinkToChange(index , e)}
+                                                                                            onSelectionChange={(e) => handleOverlayImageLinkToChange(index, e)}
                                                                                             selectorIcon={
                                                                                                 <svg
                                                                                                     aria-hidden="true"
@@ -594,6 +602,12 @@ const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmi
                                                                                     </>
                                                                                 )
                                                                         }
+
+                                                                        <button
+                                                                            onClick={() => handleOverLayImageDelete(index)}
+                                                                            className='w-[90%] h-[2rem] flex items-center justify-center font-semibold bg-red-500 text-white hover:text-black cursor-pointer hover:bg-[#fff] text-sm border border-red-500'>
+                                                                            Delete
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             )
