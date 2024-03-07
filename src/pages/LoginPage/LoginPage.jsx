@@ -16,7 +16,6 @@ const LoginPage = () => {
 
       const response = await loginUser(values);
 
-
       if (response.success) {
         localStorage.setItem("token", response.token);
         toast.success('Logged In successfully')
@@ -43,7 +42,6 @@ const LoginPage = () => {
       email: '',
       password: '',
     },
-
     // validate : loginValidate,
     validateOnBlur: false,
     validateOnChange: false,
