@@ -23,6 +23,12 @@ const Banner = () => {
     const [bannerImageLink, setBannerImageLink] = useState('')
     const [visibility, setVisibility] = useState(true);
     const [overlayImageVisibility, setOverlayImageVisibility] = useState([true, true, true]);
+    const [overlayImageLinkTo, setOverlayImageLinkTo] = useState(['', '', '']);
+    const [linkCategoryOrProduct, setLinkCategoryOrProduct] = useState('');
+    const [name, setName] = useState('');
+
+
+
 
     const dispatch = useDispatch();
 
@@ -58,13 +64,18 @@ const Banner = () => {
         // e.preventDefault();
         try {
             const bannerData = {
+                name,
                 bannerImageLink,
+                bannerLinkCategoryOrProduct: linkCategoryOrProduct,
                 isVisible: visibility,
                 overlayImages: overlayImagesLink.map((image, index) => ({
                     imageLink: image,
-                    isVisible: overlayImageVisibility[index]?.isVisible || false,
+                    isVisible: overlayImageVisibility[index],
+                    linkTo: overlayImageLinkTo[index]
                 })),
             };
+
+            console.log(bannerData , "+++++");
 
             dispatch(SetLoader(true));
             const response = await UpdateBannerById(bannerID, bannerData);
@@ -98,12 +109,16 @@ const Banner = () => {
                 onOpen();
                 setBannerID(existingTag._id);
                 setVisibility(existingTag?.isVisible);
-                setBannerImageLink(existingTag.bannerImageLink)
+                setBannerImageLink(existingTag?.bannerImageLink)
+                setLinkCategoryOrProduct(existingTag?.bannerLinkCategoryOrProduct);
+
+                setName(existingTag?.name);
                 if (existingTag?.overlayImages) {
                     setOverlayImagesLink(existingTag.overlayImages.map(overlay => overlay.imageLink));
                     setOverlayImageVisibility(existingTag.overlayImages.map(overlay => overlay.isVisible));
+                    setOverlayImageLinkTo(existingTag.overlayImages.map(overlay => overlay.linkTo));
                 }
-                
+
 
             } else {
                 throw new Error(response.message);
@@ -150,8 +165,13 @@ const Banner = () => {
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 getData={getBannerData}
-                bannerID = {bannerID}
+                bannerID={bannerID}
                 handleUpdateSubmit={handleUpdateSubmit}
+                name={name}
+                setName={setName}
+
+                overlayImageLinkTo={overlayImageLinkTo}
+                setOverlayImageLinkTo={setOverlayImageLinkTo}
 
                 selectedBannerVersion={selectedBannerVersion}
                 bannerImage={bannerImage}
@@ -160,6 +180,9 @@ const Banner = () => {
                 bannerImageLink={bannerImageLink}
                 visibility={visibility}
                 overlayImageVisibility={overlayImageVisibility}
+
+                setLinkCategoryOrProduct={setLinkCategoryOrProduct}
+                linkCategoryOrProduct={linkCategoryOrProduct}
 
                 setSelectedBannerVersion={setSelectedBannerVersion}
                 setBannerImage={setBannerImage}

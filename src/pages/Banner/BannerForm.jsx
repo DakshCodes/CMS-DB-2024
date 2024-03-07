@@ -1,29 +1,78 @@
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Switch, Tooltip } from '@nextui-org/react'
-import React, { useState } from 'react'
+import { Autocomplete, AutocompleteItem, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Select, SelectItem, Switch, Tooltip } from '@nextui-org/react'
+import React, { useEffect, useState } from 'react'
 import { UploadImage } from '../../apicalls/user'
 import { SetLoader } from '../../redux/loadersSlice'
 import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 import { CreateBanner } from '../../apicalls/banner'
+import { GetCategoryData } from '../../apicalls/category'
+import { GetProductsData } from '../../apicalls/product'
 
-const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmit,
+const BannerForm = ({ isOpen, onOpenChange, getData, bannerID, handleUpdateSubmit,
     selectedBannerVersion,
     bannerImage,
     overlayImage,
     overlayImagesLink,
     bannerImageLink,
     visibility,
+    name,
+    overlayImageLinkTo,
+    setOverlayImageLinkTo,
+    setName,
     overlayImageVisibility,
     setSelectedBannerVersion,
     setBannerImage,
     setOverlayImage,
     setOverlayImagesLink,
     setBannerImageLink,
+    setLinkCategoryOrProduct,
+    linkCategoryOrProduct,
     setVisibility,
     setOverlayImageVisibility,
 }) => {
-     // Initial visibility for 3 overlay images
+    // Initial visibility for 3 overlay images
     const dispatch = useDispatch();
+    const [categoriesData, setCategoriesData] = useState([]);
+    const [categoryProductVisibility, setCategoryProductVisibility] = useState([]);
+    const [productsData, setProductsData] = useState([]);
+
+    const getProductsData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetProductsData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setProductsData(response.products);
+                console.log("products data : ", response.products)
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message);
+        }
+    };
+
+    const getCategoryData = async () => {
+        try {
+            dispatch(SetLoader(true));
+            const response = await GetCategoryData();
+            dispatch(SetLoader(false));
+            if (response.success) {
+                setCategoriesData(response.category);
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            dispatch(SetLoader(false));
+            toast.error(error.message)
+        }
+    }
+
+    useEffect(() => {
+        getCategoryData();
+        getProductsData();
+    }, []);
 
 
     const handleBannerImageChange = (e) => {
@@ -48,14 +97,34 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
         });
     };
 
+    console.log(overlayImageVisibility,"----")
+
+    const handleOverlayImageLinkToChange = (index , id) => {
+        setOverlayImageLinkTo((prevLinkTo) => {
+            const updatedLinkTo = [...prevLinkTo];
+            updatedLinkTo[index] = id;
+            return updatedLinkTo;
+        });
+    };
+
     const handleSubmit = async (e) => {
         // e.preventDefault();
+
+        // Basic validation checks
+        if (!name || !bannerImageLink || !linkCategoryOrProduct) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+
         const bannerData = {
+            name,
             bannerImageLink,
+            bannerLinkCategoryOrProduct: linkCategoryOrProduct,
             isVisible: visibility,
             overlayImages: overlayImagesLink.map((image, index) => ({
                 imageLink: image,
                 isVisible: overlayImageVisibility[index],
+                linkTo : overlayImageLinkTo[index]
             })),
         };
 
@@ -84,36 +153,41 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
 
     };
 
-
     const uploadImage = async (e) => {
         e.preventDefault();
         try {
             dispatch(SetLoader(true));
             const formData = new FormData();
-            const imageFile = selectedBannerVersion ? bannerImage : overlayImage;
+            let imageFile, setImageLinkFunction;
+
+            if (bannerImage) {
+                imageFile = bannerImage;
+                setImageLinkFunction = (newImageLink) => {
+                    setBannerImageLink(newImageLink);
+                    setBannerImage("");
+                };
+            } else {
+                imageFile = overlayImage;
+                setImageLinkFunction = (newImageLink) => {
+                    setOverlayImagesLink((prevImages) => [...prevImages, newImageLink]);
+                    setOverlayImage('');
+                };
+            }
 
             if (imageFile) {
                 formData.append("product_images", imageFile);
-                dispatch(SetLoader(true));
                 const response = await UploadImage(formData);
                 dispatch(SetLoader(false));
 
                 if (response.success) {
                     toast.success(response.message);
                     const newImageLink = response.url;
-                    if (selectedBannerVersion) {
-                        setBannerImageLink(newImageLink);
-                    } else {
-                        setOverlayImagesLink((prevImages) => [...prevImages, newImageLink]);
-                    }
-                setOverlayImage('')
+                    setImageLinkFunction(newImageLink);
                 } else {
-
-                    console.log(response.message);
+                    toast.error(response.message);
                 }
             } else {
                 dispatch(SetLoader(false));
-                // Handle the case where the image file is not selected
                 toast.error('Please select an image file.');
             }
         } catch (error) {
@@ -122,6 +196,68 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
             console.log(error.message);
         }
     };
+
+
+    // const uploadImage = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         dispatch(SetLoader(true));
+    //         const formData = new FormData();
+    //         let imageFile;
+
+    //         if (bannerImage) {
+    //             console.log("inside banner image")
+    //             imageFile = bannerImage;
+
+    //             if (imageFile) {
+    //                 formData.append("product_images", imageFile);
+    //                 dispatch(SetLoader(true));
+    //                 const response = await UploadImage(formData);
+    //                 dispatch(SetLoader(false));
+
+    //                 if (response.success) {
+    //                     toast.success(response.message);
+    //                     const newImageLink = response.url;
+    //                     setBannerImageLink(newImageLink);
+    //                     setBannerImage("");
+    //                 } else {
+    //                     toast.error(response.message);
+    //                 }
+    //             } else {
+    //                 dispatch(SetLoader(false));
+    //                 toast.error('Please select an image file.');
+    //             }
+    //         } else {
+    //             // Handle upload for overlayImage
+    //             imageFile = overlayImage;
+    //             console.log("inside overlay image")
+
+
+    //             if (imageFile) {
+    //                 formData.append("product_images", imageFile);
+    //                 dispatch(SetLoader(true));
+    //                 const response = await UploadImage(formData);
+    //                 dispatch(SetLoader(false));
+
+    //                 if (response.success) {
+    //                     toast.success(response.message);
+    //                     const newImageLink = response.url;
+    //                     setOverlayImagesLink((prevImages) => [...prevImages, newImageLink]);
+    //                     setOverlayImage('');
+    //                 } else {
+    //                     toast.error(response.message);
+    //                 }
+    //             } else {
+    //                 dispatch(SetLoader(false));
+    //                 toast.error('Please select an image file.');
+    //             }
+    //         }
+    //     } catch (error) {
+    //         dispatch(SetLoader(false));
+    //         toast.error(error.message);
+    //         console.log(error.message);
+    //     }
+    // };
 
     console.log(selectedBannerVersion)
 
@@ -143,6 +279,13 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
                             <ModalHeader className="flex flex-col gap-1">Add Banner</ModalHeader>
                             <ModalBody>
                                 <div className='flex flex-col gap-4'>
+                                    <div>
+                                        <Input
+                                            placeholder='Enter the Title'
+                                            onValueChange={(value) => setName(value)}
+                                            value={name}
+                                        />
+                                    </div>
                                     <div className='flex items-center w-full gap-4'>
                                         <span className='font-semibold'>Choose the banner version : </span>
                                         <select
@@ -159,6 +302,7 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
 
                                     </div>
 
+                                    {/* Visibility Toggle */}
                                     <div className="mb-4 border-black mt-6 gap-4 flex items-center">
                                         <div className='text-xl font-semibold'>Visibility</div>
                                         <Tooltip showArrow={true} color='secondary' placement="bottom-start" content="Do you want to make this banner component visible in main website ? ">
@@ -174,6 +318,99 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
                                         >
                                             {visibility ? 'yes' : 'no'}
                                         </Switch>
+                                    </div>
+
+                                    <div className='flex gap-4 items-center font-bold'>
+
+                                        <div>Add Link to the banner itself</div>
+                                        <Switch
+                                            defaultSelected={categoryProductVisibility}
+                                            size="lg"
+                                            color='secondary'
+                                            onChange={() => {setCategoryProductVisibility(!categoryProductVisibility); setLinkCategoryOrProduct('') ; setOverlayImageLinkTo(['','',''])}}
+                                        >
+                                            {categoryProductVisibility ? 'Select Categories' : 'Select Products'}
+                                        </Switch>
+
+
+                                        {
+                                            categoryProductVisibility ?
+                                                (
+                                                    <>
+                                                        <Autocomplete
+                                                            placeholder="Link Category"
+                                                            defaultItems={categoriesData}
+                                                            labelPlacement="outside"
+                                                            className="max-w-[12rem] font-[800] font-sans"
+                                                            size='md'
+                                                            disableSelectorIconRotation
+                                                            onSelectionChange={(e) => setLinkCategoryOrProduct(e)}
+                                                            defaultSelectedKey={linkCategoryOrProduct}
+                                                            selectorIcon={
+                                                                <svg
+                                                                    aria-hidden="true"
+                                                                    fill="none"
+                                                                    focusable="false"
+                                                                    height="1em"
+                                                                    role="presentation"
+                                                                    stroke="currentColor"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth="1.5"
+                                                                    viewBox="0 0 24 24"
+                                                                    width="1em"
+                                                                >
+                                                                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                                                                    <path d="M8 9l4 -4l4 4" />
+                                                                    <path d="M16 15l-4 4l-4 -4" />
+                                                                </svg>
+                                                            }
+                                                        >
+                                                            {(item) => <AutocompleteItem key={item._id}>{item?.parentCategory?.name ? item?.parentCategory?.name + "->" + item?.name : item?.name}</AutocompleteItem>}
+                                                        </Autocomplete>
+                                                    </>
+                                                )
+
+                                                :
+
+                                                (
+                                                    <>
+                                                        <Autocomplete
+                                                            placeholder="Link Product"
+                                                            defaultItems={productsData}
+                                                            labelPlacement="outside"
+                                                            className="max-w-[12rem] font-[800] font-sans"
+                                                            size='md'
+                                                            disableSelectorIconRotation
+                                                            onSelectionChange={(e) => setLinkCategoryOrProduct(e)}
+                                                            defaultSelectedKey={linkCategoryOrProduct}
+                                                            selectorIcon={
+                                                                <svg
+                                                                    aria-hidden="true"
+                                                                    fill="none"
+                                                                    focusable="false"
+                                                                    height="1em"
+                                                                    role="presentation"
+                                                                    stroke="currentColor"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth="1.5"
+                                                                    viewBox="0 0 24 24"
+                                                                    width="1em"
+                                                                >
+                                                                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                                                                    <path d="M8 9l4 -4l4 4" />
+                                                                    <path d="M16 15l-4 4l-4 -4" />
+                                                                </svg>
+                                                            }
+                                                        >
+                                                            {(item) => <AutocompleteItem key={item._id}>{item?.main_category + "->" + item?.productName}</AutocompleteItem>}
+                                                        </Autocomplete>
+                                                    </>
+                                                )
+                                        }
+
+
                                     </div>
 
                                     <div className='font-semibold'>Step - 1 <span className='italic text-sm text-gray-600'>(Insert the banner image in this step)</span></div>
@@ -259,21 +496,103 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
                                                                 <div className='flex flex-col items-center'>
                                                                     <img className='w-[200px] col-span-1 b h-[200px] object-cover' src={item} alt="" />
 
-                                                                    <div className="mb-4 border-black mt-6 gap-4 flex items-center">
+                                                                    <div className="mb-4 border-black mt-6 gap-4 flex flex-col items-center">
                                                                         {/* <div className='text-xl font-semibold'>Visibility</div> */}
-                                                                        <Tooltip showArrow={true} color='secondary' placement="bottom-start" content="Do you want to make this overlay Image visible in main website ? ">
-                                                                            <svg className="w-6 h-6 hover:cursor-pointer text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                                                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-                                                                            </svg>
-                                                                        </Tooltip>
-                                                                        <Switch
-                                                                            defaultSelected={overlayImageVisibility[index]}
-                                                                            size="lg"
-                                                                            color='secondary'
-                                                                            onChange={() => handleOverlayImageVisibilityChange(index)}
-                                                                        >
-                                                                            {overlayImageVisibility[index] ? 'yes' : 'no'}
-                                                                        </Switch>
+                                                                        <div className='flex items-center gap-2'>
+
+                                                                            <Tooltip showArrow={true} color='secondary' placement="bottom-start" content="Do you want to make this overlay Image visible in main website ? ">
+                                                                                <svg className="w-6 h-6 hover:cursor-pointer text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                                                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                                                                                </svg>
+                                                                            </Tooltip>
+                                                                            <Switch
+                                                                                defaultSelected={overlayImageVisibility[index]}
+                                                                                size="lg"
+                                                                                color='secondary'
+                                                                                onChange={() => handleOverlayImageVisibilityChange(index)}
+                                                                            >
+                                                                                {overlayImageVisibility[index] ? 'yes' : 'no'}
+                                                                            </Switch>
+
+                                                                        </div>
+
+
+                                                                        {
+                                                                            categoryProductVisibility ?
+                                                                                (
+                                                                                    <>
+                                                                                        <Autocomplete
+                                                                                            placeholder="Link Category"
+                                                                                            defaultItems={categoriesData}
+                                                                                            labelPlacement="outside"
+                                                                                            className="max-w-[12rem] font-[800] font-sans"
+                                                                                            size='md'
+                                                                                            disableSelectorIconRotation
+                                                                                            defaultSelectedKey={overlayImageLinkTo[index]}
+                                                                                            onSelectionChange={(e) => handleOverlayImageLinkToChange(index , e)}
+                                                                                            selectorIcon={
+                                                                                                <svg
+                                                                                                    aria-hidden="true"
+                                                                                                    fill="none"
+                                                                                                    focusable="false"
+                                                                                                    height="1em"
+                                                                                                    role="presentation"
+                                                                                                    stroke="currentColor"
+                                                                                                    strokeLinecap="round"
+                                                                                                    strokeLinejoin="round"
+                                                                                                    strokeWidth="1.5"
+                                                                                                    viewBox="0 0 24 24"
+                                                                                                    width="1em"
+                                                                                                >
+                                                                                                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                                                                                                    <path d="M8 9l4 -4l4 4" />
+                                                                                                    <path d="M16 15l-4 4l-4 -4" />
+                                                                                                </svg>
+                                                                                            }
+                                                                                        >
+                                                                                            {(item) => <AutocompleteItem key={item._id}>{item?.parentCategory?.name ? item?.parentCategory?.name + "->" + item?.name : item?.name}</AutocompleteItem>}
+                                                                                        </Autocomplete>
+                                                                                    </>
+                                                                                )
+
+                                                                                :
+
+                                                                                (
+                                                                                    <>
+                                                                                        <Autocomplete
+                                                                                            placeholder="Link Product"
+                                                                                            defaultItems={productsData}
+                                                                                            labelPlacement="outside"
+                                                                                            className="max-w-[12rem] font-[800] font-sans"
+                                                                                            size='md'
+                                                                                            defaultSelectedKey={overlayImageLinkTo[index]}
+                                                                                            disableSelectorIconRotation
+                                                                                            onSelectionChange={(e) => handleOverlayImageLinkToChange(index , e)}
+                                                                                            selectorIcon={
+                                                                                                <svg
+                                                                                                    aria-hidden="true"
+                                                                                                    fill="none"
+                                                                                                    focusable="false"
+                                                                                                    height="1em"
+                                                                                                    role="presentation"
+                                                                                                    stroke="currentColor"
+                                                                                                    strokeLinecap="round"
+                                                                                                    strokeLinejoin="round"
+                                                                                                    strokeWidth="1.5"
+                                                                                                    viewBox="0 0 24 24"
+                                                                                                    width="1em"
+                                                                                                >
+                                                                                                    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
+                                                                                                    <path d="M8 9l4 -4l4 4" />
+                                                                                                    <path d="M16 15l-4 4l-4 -4" />
+                                                                                                </svg>
+                                                                                            }
+                                                                                        >
+                                                                                            {(item) => <AutocompleteItem key={item._id}>{item?.main_category + "->" + item?.productName}</AutocompleteItem>}
+                                                                                        </Autocomplete>
+                                                                                    </>
+                                                                                )
+                                                                        }
                                                                     </div>
                                                                 </div>
                                                             )
@@ -293,7 +612,7 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
                                     Close
                                 </Button>
                                 <Button className='bg-[#000] text-[#fff]' onPress={bannerID ? handleUpdateSubmit : handleSubmit}>
-                                    {bannerID ?"Update" :"Create"}
+                                    {bannerID ? "Update" : "Create"}
                                 </Button>
                             </ModalFooter>
                         </>
