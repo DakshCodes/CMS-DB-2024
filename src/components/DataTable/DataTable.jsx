@@ -185,7 +185,7 @@ const DataTable = ({ data, columnss, deleteItem, section }) => {
 
     const bottomContent = React.useMemo(() => {
         return (
-            <div className="py-10  flex justify-between items-center ">
+            <div className="py-10 flex justify-between items-center ">
                 <Pagination
                     showControls
                     classNames={{

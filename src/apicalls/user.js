@@ -6,7 +6,6 @@ export const loginUser = async (payload) => {
   try {
     const response = await axios.post(`${import.meta.env.VITE_SERVER}/api/login`, payload);
     return response.data;
-    const id = response.data.user._id
   } catch (error) {
     return error.message
   }

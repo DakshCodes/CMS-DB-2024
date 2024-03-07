@@ -215,7 +215,6 @@ const BannerForm = ({ isOpen, onOpenChange ,getData, bannerID, handleUpdateSubmi
                                     {/* Single Banner -> True  , and Sinle Banner with overlay images */}
 
 
-
                                     {(selectedBannerVersion === false) && (
                                         <>
                                             <div className='font-semibold'>Step - 2 <span className='italic text-sm text-gray-600'>(Insert 3 overlay images in this step)</span></div>
